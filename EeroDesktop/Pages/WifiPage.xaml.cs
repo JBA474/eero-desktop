@@ -32,7 +32,11 @@ public partial class WifiPage : PageBase
         var name = NameBox.Text.Trim();
         if (name.Length == 0) return;
         if (!Confirm($"Rename your Wi-Fi to \"{name}\"? Wi-Fi devices will need to reconnect.", "Change Network Name")) return;
-        await Run("Saving network name…", () => Api.PutFormAsync(S.NetworkUrl, new Dictionary<string, string?> { ["name"] = name }), "Network name saved.");
+        var oldName = S.Network.S("name") ?? "";
+        var url = S.NetworkUrl;
+        if (await Run("Saving network name…", () => Api.PutFormAsync(url, new Dictionary<string, string?> { ["name"] = name }), "Network name saved.") && oldName.Length > 0)
+            UndoService.RecordRequest($"Renamed Wi-Fi {oldName} to {name}", $"Rename the Wi-Fi back to {oldName}", $"Renamed Wi-Fi {name} back to {oldName}",
+                $"Rename the Wi-Fi to {name} again", new("PUT", url, Form: new() { ["name"] = oldName }), new("PUT", url, Form: new() { ["name"] = name }));
         await LoadAsync();
     }
 
@@ -68,11 +72,21 @@ public partial class WifiPage : PageBase
         var url = S.TryRes("guestnetwork") ?? S.NetworkUrl + "/guestnetwork";
         var name = GuestNameBox.Text.Trim();
         if (name.Length == 0) { S.Report("Enter a guest network name."); return; }
-        await Run("Saving guest network…", () => Api.PutFormAsync(url, new Dictionary<string, string?>
+        var oldName = _guest.S("name") ?? name;
+        var wasOn = _guest.B("enabled");
+        var on = GuestEnabled.IsChecked == true;
+        if (await Run("Saving guest network…", () => Api.PutFormAsync(url, new Dictionary<string, string?>
+            {
+                ["name"] = name,
+                ["enabled"] = EeroClient.Bool(on),
+            }), "Guest network saved.") && (oldName != name || wasOn != on))
         {
-            ["name"] = name,
-            ["enabled"] = EeroClient.Bool(GuestEnabled.IsChecked == true),
-        }), "Guest network saved.");
+            string Describe(string n, bool e) => $"guest network {n} ({(e ? "on" : "off")})";
+            UndoService.RecordRequest($"Changed the {Describe(oldName, wasOn)} to {Describe(name, on)}", $"Put the {Describe(oldName, wasOn)} back",
+                $"Put the {Describe(oldName, wasOn)} back", $"Change it to {Describe(name, on)} again",
+                new("PUT", url, Form: new() { ["name"] = oldName, ["enabled"] = EeroClient.Bool(wasOn) }),
+                new("PUT", url, Form: new() { ["name"] = name, ["enabled"] = EeroClient.Bool(on) }));
+        }
         await LoadAsync();
     }
 

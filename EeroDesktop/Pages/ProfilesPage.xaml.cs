@@ -74,7 +74,11 @@ public partial class ProfilesPage : PageBase
         if (Selected() is not { } p) return;
         var d = new FormDialog(Owner, "Rename Profile").Text("name", "Profile name", p.Name, required: true);
         if (!d.Prompt()) return;
-        await Run("Renaming…", () => Api.PutJsonAsync(p.Json.S("url")!, new JsonObject { ["name"] = d.Get("name") }), "Profile renamed.");
+        var url = p.Json.S("url")!;
+        var newName = d.Get("name");
+        if (await Run("Renaming…", () => Api.PutJsonAsync(url, new JsonObject { ["name"] = newName }), "Profile renamed."))
+            UndoService.RecordRequest($"Renamed profile {p.Name} to {newName}", $"Rename it back to {p.Name}", $"Renamed profile {newName} back to {p.Name}",
+                $"Rename it to {newName} again", new("PUT", url, new JsonObject { ["name"] = p.Name }), new("PUT", url, new JsonObject { ["name"] = newName }));
         await LoadAsync();
     }
 
@@ -82,9 +86,13 @@ public partial class ProfilesPage : PageBase
     {
         if (Selected() is not { } p) return;
         var pause = !p.Paused;
-        await Run(pause ? $"Pausing {p.Name}…" : $"Resuming {p.Name}…",
-            () => Api.PutJsonAsync(p.Json.S("url")!, new JsonObject { ["paused"] = pause }),
-            pause ? $"Internet paused for {p.Name}." : $"Internet resumed for {p.Name}.");
+        var url = p.Json.S("url")!;
+        if (await Run(pause ? $"Pausing {p.Name}…" : $"Resuming {p.Name}…",
+            () => Api.PutJsonAsync(url, new JsonObject { ["paused"] = pause }),
+            pause ? $"Internet paused for {p.Name}." : $"Internet resumed for {p.Name}."))
+            UndoService.RecordRequest(pause ? $"Paused profile {p.Name}" : $"Resumed profile {p.Name}", pause ? $"Resume {p.Name}" : $"Pause {p.Name} again",
+                pause ? $"Resumed profile {p.Name}" : $"Paused profile {p.Name} again", pause ? $"Pause {p.Name} again" : $"Resume {p.Name}",
+                new("PUT", url, new JsonObject { ["paused"] = !pause }), new("PUT", url, new JsonObject { ["paused"] = pause }));
         await LoadAsync();
     }
 

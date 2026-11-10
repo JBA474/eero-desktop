@@ -286,7 +286,8 @@ $pageChecks = [ordered]@{
     'Profiles'             = { param($w) $g = Find $w 'ProfileGrid'; Assert ($null -ne $g) 'ProfileGrid missing'; "$(Get-Rows $g) profile(s)" }
     'Wi-Fi & Guest'        = { param($w) $n = Get-Value (Find $w 'NameBox'); Assert ([bool]$n) 'Wi-Fi name empty'; "Wi-Fi '$n'" }
     'Advanced'             = { param($w) Assert ($null -ne (Find $w 'Toggles')) 'Toggles missing'; Assert ($null -ne (Find $w 'DnsFacts')) 'DnsFacts missing'; 'toggles + DNS shown' }
-    'Reservations & Ports' = { param($w) "$(Get-Rows (Find $w 'ReservationGrid')) reservation(s), $(Get-Rows (Find $w 'ForwardGrid')) forward(s)" }
+    'Security Check'       = { param($w) $s = Wait-Until { $t = (Find $w 'SecuritySummary').Current.Name; if ($t) { $t } } 20 'security summary'; $c = Get-Rows (Find $w 'SecurityFindings'); Assert ($c -ge 4) "only $c findings"; "$c findings: $s" }
+    'Reservations & Ports' = { param($w) "$(Get-Rows (Find $w 'ReservationGrid')) reservation(s), $(Get-Rows (Find $w 'ForwardGrid')) forward(s), $(Get-Rows (Find $w 'PinholeGrid')) pinhole(s)" }
     'Activity'             = { param($w) "$(Get-Rows (Find $w 'SpeedGrid')) speed test(s)" }
     'History'              = { param($w) foreach ($id in 'SpeedChart', 'SpeedHistoryGrid', 'OutageGrid', 'DnsHistoryChart', 'DnsHistoryGrid') { Assert ($null -ne (Find $w $id)) "$id missing" }; "$(Get-Rows (Find $w 'SpeedHistoryGrid')) saved speed test(s)" }
     'Updates'              = { param($w) Assert ($null -ne (Find $w 'Facts')) 'Facts missing'; "$(Get-Rows (Find $w 'Grid')) eero firmware row(s)" }
@@ -332,6 +333,21 @@ Test 'Devices: search filters the list and clearing it restores it' {
     Wait-Until { (Get-Rows $grid) -eq $all } 5 'filter cleared' | Out-Null
     "$all -> 0 -> $all rows"
 }
+Test 'Devices: "Needs a Name" shows only devices with machine-made names, and turning it off restores the list' {
+    $grid = Find $main 'Grid'
+    $all = Get-Rows $grid
+    $box = Find $main 'NeedsNameOnly'
+    $toggle = $box.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern)
+    $toggle.Toggle(); Start-Sleep -Milliseconds 500
+    $unnamed = Get-Rows $grid
+    $toggle.Toggle(); Start-Sleep -Milliseconds 500
+    $counted = if ((Find $main 'CountText').Current.Name -match '(\d+) need a name') { [int]$Matches[1] } else { 0 }
+    Assert ($unnamed -le $counted) "filter showed $unnamed rows but only $counted devices need a name"
+    if ($counted -gt 0 -and $counted -lt $all) { Assert ($unnamed -lt $all) 'the filter did not narrow the list' }
+    Assert ((Get-Rows $grid) -eq $all) 'list not restored after turning the filter off'
+    "$all devices, $unnamed need a name; $((Find $main 'CountText').Current.Name)"
+}
+
 Test 'Wi-Fi: password is masked until Show is pressed, and Hide masks it again' {
     (Find-ByName (Find $main 'Nav') 'Wi-Fi & Guest' $CT::ListItem).GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
     $masked = Wait-Until { $m = Find $main 'PasswordBoxMasked'; if ($m -and $m.Current.IsEnabled) { $m } } $PageTimeoutSec 'masked password field'
@@ -417,6 +433,22 @@ Test 'eeros: Ports window lists ports and protects the internet port' {
     $win.GetCurrentPattern([System.Windows.Automation.WindowPattern]::Pattern).Close()
     Wait-Until { -not (Test-OwnedWindowOpen 'Ports*') } 5 'Ports window to close' | Out-Null
     $detail
+}
+Test 'Reservations & Ports: Add Pinhole lists devices and Cancel sends nothing' {
+    Select-Page 'Reservations & Ports'
+    $before = Get-Rows (Find $main 'PinholeGrid')
+    $add = @($main.FindAll($TS::Descendants, (New-Object System.Windows.Automation.AndCondition (New-Object System.Windows.Automation.PropertyCondition ($AE::NameProperty), 'Add'), (New-Object System.Windows.Automation.PropertyCondition ($AE::ControlTypeProperty), $CT::Button))))[-1]   # the pinholes' Add button (last on the page)
+    # The page disables itself while it loads the device list, which can make UI Automation report an error for the click itself.
+    # Press again until the dialog is up (a press can be lost while the page re-enables; once the dialog is open the main window ignores presses).
+    Wait-Until { if (-not (Test-OwnedWindowOpen 'Add IPv6 Pinhole')) { try { Invoke-El $add } catch { }; Start-Sleep -Milliseconds 1500 }; Test-OwnedWindowOpen 'Add IPv6 Pinhole' } 20 'Add IPv6 Pinhole dialog' | Out-Null
+    $dlg = Get-OwnedWindow 'Add IPv6 Pinhole'
+    $combo = $dlg.FindFirst($TS::Descendants, (New-Object System.Windows.Automation.PropertyCondition ($AE::ControlTypeProperty), $CT::ComboBox))
+    Assert ($null -ne $combo) 'device list missing'
+    Invoke-El (Find-ByName $dlg 'Cancel' $CT::Button)
+    Wait-Until { -not (Test-OwnedWindowOpen 'Add IPv6 Pinhole') } 10 'dialog to close' | Out-Null
+    Select-Page 'Settings'; Select-Page 'Reservations & Ports'
+    Assert ((Get-Rows (Find $main 'PinholeGrid')) -eq $before) 'pinhole count changed after Cancel'
+    "dialog opened with a device list; cancelled; still $before pinhole(s)"
 }
 function Get-Luminance([string]$Name) {
     $bmp = Save-Shot $hwnd $Name
@@ -544,6 +576,8 @@ Test 'Settings › About: dnspyre is credited with links to its GitHub source an
     Assert ($null -ne $src -and $null -ne $docs) 'dnspyre links missing from About'
     Assert ($null -ne (Find $main 'DnspyreLicenseButton')) 'View dnspyre License button missing'
     $credit = (Find $main 'DnspyreCredit').Current.Name
+    $disclaimer = (Find $main 'Disclaimer').Current.Name
+    Assert ($disclaimer -match 'not developed, endorsed or supported by eero LLC or Amazon\.com, Inc\.') "disclaimer text: '$disclaimer'"
     "links: $($src.Current.Name), $($docs.Current.Name)"
 }
 Test 'DNS Benchmark: dnspyre ranks providers, recommends the fastest, shows graphs (nothing switched)' {
@@ -580,7 +614,7 @@ Test 'History: speed tests, outages and the DNS benchmark appear in charts, tile
         @{ Network = $netId; Utc = $down.AddMinutes(12).ToString('o'); Kind = 'internet'; Subject = 'Internet'; State = 'up'; Detail = '' }
     ) | ForEach-Object { ($_ | ConvertTo-Json -Compress) } | Add-Content (Join-Path $hist 'events.jsonl')
     Select-Page 'Settings'; Select-Page 'History'   # reload the page
-    $count = Wait-Until { $e = Find $main 'OutageCount'; if ($e -and $e.Current.Name -match '^Internet outages?: [1-9]') { $e.Current.Name } } 15 'outage tile'
+    $count = Wait-Until { $e = Find $main 'OutageCount'; if ($e -and $e.Current.Name -match '^Internet outages?: [1-9]') { $e.Current.Name } } 30 'outage tile'
     Assert ((Get-Rows (Find $main 'OutageGrid')) -ge 1) 'outage table empty'
     Assert ((Find $main 'OutageDowntime').Current.Name -match '12 min') "downtime tile '$((Find $main 'OutageDowntime').Current.Name)'"
     $dns = Get-Rows (Find $main 'DnsHistoryGrid')

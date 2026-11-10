@@ -25,6 +25,7 @@ public partial class MainWindow : Window
             new ProfilesPage(),
             new WifiPage(),
             new AdvancedPage(),
+            new SecurityPage(),
             new PortsPage(),
             new ActivityPage(),
             new HistoryPage(),
@@ -33,6 +34,8 @@ public partial class MainWindow : Window
             new SettingsPage(),
         ];
         Nav.ItemsSource = _pages.Select(p => p.Title).ToList();
+        foreach (var security in _pages.OfType<SecurityPage>())
+            security.OpenPage = title => Nav.SelectedIndex = _pages.FindIndex(p => p.Title == title);
         _state.StatusChanged += OnStatus;
         UndoService.Changed += OnUndoChanged;
         Loaded += OnLoaded;

@@ -199,6 +199,33 @@ public partial class PortsPage : PageBase
 
     // ----- IPv6 pinholes -----
 
+    /// <summary>
+    /// Opens a port to one device over IPv6. Body as in the eero app (NetRules.Pinhole: url, device, protocol, port),
+    /// POSTed to the network's pinholes list; device is the device's API URL.
+    /// </summary>
+    private async void AddPinhole_Click(object sender, RoutedEventArgs e)
+    {
+        Dictionary<string, JsonObject> devices = [];
+        if (!await Run("Loading devices…", async () => devices = await DevicesByUrlAsync())) return;
+        var choices = devices.Values.Distinct().Where(d => d.S("url") is { Length: > 0 })
+            .Select(d => (Label: $"{DevicesPage.DeviceName(d)} ({d.S("mac")})", Url: d.S("url")!))
+            .OrderBy(c => c.Label, StringComparer.CurrentCultureIgnoreCase).ToList();
+        if (choices.Count == 0) { S.Report("No devices found."); return; }
+        var d = new FormDialog(Owner, "Add IPv6 Pinhole",
+                "Lets devices on the internet reach this device's port over IPv6 (IPv4 uses port forwarding instead). Only open ports for services you run, such as Plex (32400).")
+            .Choice("device", "Device", choices.Select(c => c.Label).ToList(), choices[0].Label)
+            .Text("port", "Port (or range like 8000-8010)", required: true)
+            .Choice("proto", "Protocol", Protocols, "tcp");
+        if (!d.Prompt()) return;
+        var port = d.Get("port").Trim();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(port, @"^\d{1,5}(-\d{1,5})?$")) { S.Report("Enter a port number such as 32400, or a range such as 8000-8010."); return; }
+        var device = choices.First(c => c.Label == d.Get("device"));
+        var body = new JsonObject { ["url"] = "", ["device"] = device.Url, ["protocol"] = d.Get("proto"), ["port"] = port };
+        await Run("Creating pinhole…", () => Api.PostJsonAsync(S.NetworkUrl + "/ipv6/pinholes", body),
+            $"Pinhole created: {device.Label}, port {port}{(PortService(port) is { Length: > 0 } svc ? $" ({svc})" : "")}.");
+        await LoadAsync();
+    }
+
     private async void DeletePinhole_Click(object sender, RoutedEventArgs e)
     {
         if (PinholeGrid.SelectedItem is not PinholeRow p) { S.Report("Select a pinhole first."); return; }

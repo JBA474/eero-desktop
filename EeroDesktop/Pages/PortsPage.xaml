@@ -57,6 +57,7 @@
         <DockPanel Grid.Row="5" Margin="0,16,0,0">
             <TextBlock Text="IPv6 Pinholes" Style="{StaticResource SectionTitle}" DockPanel.Dock="Left" Margin="0,4,16,8"/>
             <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Add" Click="AddPinhole_Click"/>
                 <Button Content="Delete" Style="{StaticResource DangerButton}" Click="DeletePinhole_Click"/>
                 <Button Content="Raw Firewall Rules" Click="Rules_Click"/>
             </StackPanel>

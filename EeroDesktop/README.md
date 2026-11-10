@@ -1,5 +1,8 @@
 # eero Desktop
 
+> **Unofficial application.** eero Desktop is not developed, endorsed or supported by eero LLC or Amazon.com, Inc.
+> eero is a trademark of eero LLC, an Amazon company.
+
 Windows (WPF, .NET 10) app for managing an eero network without a phone. It talks to the same cloud API as the
 eero Android app (v26.13.0), mapped from the decompiled APK — see `..\research\API_MAP.md`.
 
@@ -80,6 +83,31 @@ by you from APKMirror; `-Open` opens the page). Nothing is downloaded automatica
 Before each Advanced-page switch or DNS change (including ad blocking and DNS Benchmark switches) is sent, the value it
 replaces is saved in `undo.json`. **Undo Last Change** in the header (shown only when there's something to undo) asks
 first, warns when it restarts the eeros, and sends one change; undoing again redoes. It survives restarts.
+
+Device rename / pause / block / profile, profile rename / pause, Wi-Fi name and guest network name/on-off are undoable
+too: each saves the exact request that undoes it and the one that redoes it. Passwords are never stored, so password
+changes can't be undone.
+
+## Security Check
+
+Read-only page: Wi-Fi password length, WPA3, open guest network, UPnP, every enabled port forward (flagged when the
+target IP has no reservation or nothing is online there), IPv6 pinholes (device gone/offline), devices that need a
+name, pending eero updates, eero Plus threat blocking. Double-click a row to open the page that fixes it. Logic in
+`SecurityCheck.cs` (offline-tested).
+
+## Devices that need a name
+
+Devices › **Needs a Name** shows devices known only by a MAC, a DNS hostname ("lp05vu8c.adhcscint.net.") or a random
+default ("Android_7I5KBBQS"); Rename suggests a name from the manufacturer and device type ("Intel Laptop").
+
+## IPv6 pinholes
+
+Reservations & Ports › IPv6 Pinholes lists the device by name and MAC with a Service column (32400 = Plex, …) and can
+**Add** a pinhole (body from the eero app's `NetRules.Pinhole`: url, device URL, protocol, port).
+
+## Hands-on checklist
+
+`tests\HANDS_ON_CHECKLIST.md`: the changes the automated tests never make, safest first, with how to undo each.
 
 ## Ad-blocking DNS
 

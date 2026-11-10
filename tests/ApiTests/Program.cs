@@ -388,6 +388,71 @@ await Test("IPv6 pinholes show the device's name and MAC, and well-known ports s
     return Task.FromResult($"{named}; {unknown}");
 });
 
+await Test("Needs a Name: machine-made names are flagged, real ones aren't, and a name is suggested", () =>
+{
+    JsonObject D(string? host, string? nick = null, string? maker = null, string? type = null)
+        => new() { ["hostname"] = host, ["nickname"] = nick, ["manufacturer"] = maker, ["device_type"] = type, ["mac"] = "98:43:fa:f3:28:1b" };
+    var flagged = new[] { "lp05vu8c.adhcscint.net.", "Android_7I5KBBQS", "ESP_3A9F21", "98:43:fa:f3:28:1b", "" };
+    var fine = new[] { "Bedroom-TV", "Bosch Dishwasher", "fireplacespeaker", "Doorbell Speaker", "dell-win11." };
+    var wrongFlag = flagged.Where(h => !EeroDesktop.Pages.DevicesPage.NeedsName(D(h))).ToList();
+    var wrongFine = fine.Where(h => EeroDesktop.Pages.DevicesPage.NeedsName(D(h))).ToList();
+    Assert(wrongFlag.Count == 0, "not flagged: " + string.Join(", ", wrongFlag));
+    Assert(wrongFine.Count == 0, "wrongly flagged: " + string.Join(", ", wrongFine));
+    Assert(!EeroDesktop.Pages.DevicesPage.NeedsName(D("Android_7I5KBBQS", nick: "Jess's Phone")), "a nickname should count as named");
+    var s1 = EeroDesktop.Pages.DevicesPage.SuggestName(D("lp05vu8c.adhcscint.net.", maker: "Intel Corporate", type: "laptop"));
+    var s2 = EeroDesktop.Pages.DevicesPage.SuggestName(D("iPhone", maker: "Apple, Inc."));
+    Assert(s1 == "Intel Laptop" && s2 == "Apple iPhone", $"{s1} / {s2}");
+    return Task.FromResult($"{flagged.Length} flagged, {fine.Length} left alone; suggestions: {s1}, {s2}");
+});
+
+await Test("Undo for a device rename sends the saved request, and undoing again renames it back", async () =>
+{
+    fake.ValidToken = "tok"; fake.Network = new JsonObject { ["name"] = "Home", ["resources"] = new JsonObject { ["settings"] = "/2.2/networks/1/settings" } };
+    var s = EeroDesktop.AppState.Current; s.Api.Token = "tok";
+    await s.SelectNetworkAsync(new EeroDesktop.NetworkRef("Home", "/2.2/networks/1"));
+    EeroDesktop.UndoService.RecordRequest("Renamed TV to Den TV", "Rename it back to TV", "Renamed Den TV back to TV", "Rename it to Den TV again",
+        new("PUT", "/2.3/networks/1/devices/aa", new JsonObject { ["nickname"] = "TV" }), new("PUT", "/2.3/networks/1/devices/aa", new JsonObject { ["nickname"] = "Den TV" }));
+    var seen = fake.Bodies.Count;
+    await EeroDesktop.UndoService.UndoAsync(EeroDesktop.UndoService.For("1")!);
+    var after = EeroDesktop.UndoService.For("1")!;
+    await EeroDesktop.UndoService.UndoAsync(after);
+    var sent = fake.Bodies.Skip(seen).Where(b => b.Path == "/2.3/networks/1/devices/aa").Select(b => b.Body).ToList();
+    Assert(sent.SequenceEqual(["{\"nickname\":\"TV\"}", "{\"nickname\":\"Den TV\"}"]), "sent: " + string.Join(" | ", sent));
+    Assert(after.Done == "Renamed Den TV back to TV" && after.UndoText == "Rename it to Den TV again", $"{after.Done} / {after.UndoText}");
+    return $"undo → {sent[0]}, redo → {sent[1]}";
+});
+
+await Test("Security check flags risky settings and explains every open port", () =>
+{
+    var net = new JsonObject { ["password"] = "short123", ["wpa3"] = false, ["upnp"] = true, ["updates"] = new JsonObject { ["has_update"] = false } };
+    var devices = new List<JsonObject>
+    {
+        new() { ["url"] = "/2.2/networks/1/devices/9009d0581ebb", ["mac"] = "90:09:d0:58:1e:bb", ["nickname"] = "NAS", ["ip"] = "192.168.1.69", ["connected"] = true },
+        new() { ["url"] = "/2.2/networks/1/devices/9843faf3281b", ["mac"] = "98:43:fa:f3:28:1b", ["hostname"] = "lp05vu8c.adhcscint.net.", ["ip"] = "192.168.1.119", ["connected"] = true },
+    };
+    var forwards = new List<JsonObject>
+    {
+        new() { ["description"] = "Plex", ["ip"] = "192.168.1.69", ["gateway_port"] = "32400", ["enabled"] = true },
+        new() { ["description"] = "Old game", ["ip"] = "192.168.1.200", ["gateway_port"] = "25565", ["enabled"] = true },
+        new() { ["description"] = "Off", ["ip"] = "192.168.1.69", ["gateway_port"] = "5001", ["enabled"] = false },
+        new() { ["description"] = "DSM", ["ip"] = "192.168.1.69", ["gateway_port"] = "5001", ["enabled"] = true },
+    };
+    var reservations = new List<JsonObject> { new() { ["ip"] = "192.168.1.69" } };
+    var pinholes = new List<JsonObject> { new() { ["device"] = "/2.2/networks/1/devices/9009d0581ebb", ["port"] = "32400" } };
+    var guest = new JsonObject { ["enabled"] = true, ["name"] = "JBA Guest" };
+    var f = EeroDesktop.SecurityCheck.Run(new(net, devices, forwards, reservations, pinholes, guest, false));
+    string StatusOf(string check, string contains = "") => f.First(x => x.Check == check && x.Detail.Contains(contains)).Status;
+    Assert(StatusOf("Guest network password") == "Problem", "open guest network");
+    Assert(StatusOf("Port forward", "Old game") == "Problem", "forward without reservation");
+    Assert(StatusOf("Port forward", "Plex") == "OK" && f.First(x => x.Detail.StartsWith("Plex")).Detail.Contains("Plex Media Server"), "Plex forward");
+    Assert(StatusOf("Wi-Fi password length") == "Warning" && StatusOf("UPnP") == "Warning" && StatusOf("WPA3") == "Warning", "warnings");
+    Assert(StatusOf("IPv6 pinhole") == "OK" && f.First(x => x.Check == "IPv6 pinhole").Detail.Contains("NAS (90:09:d0:58:1e:bb)"), "pinhole");
+    Assert(StatusOf("Device names") == "Warning" && StatusOf("Disabled port forwards") == "OK", "devices / disabled");
+    Assert(StatusOf("Port forward", "DSM") == "Warning" && f.First(x => x.Detail.StartsWith("DSM")).Detail.Contains("VPN"), "admin login forward");
+    Assert(f[0].Status == "Problem" && f[^1].Status == "OK", "problems first");
+    return Task.FromResult($"{f.Count(x => x.Status == "Problem")} problems, {f.Count(x => x.Status == "Warning")} warnings, {f.Count(x => x.Status == "OK")} OK");
+});
+
 fake.Stop();
 foreach (var r in results) Console.WriteLine($"{(r.Pass ? "PASS" : "FAIL")}  {r.Name}  —  {r.Detail}");
 var failed = results.Count(r => !r.Pass);

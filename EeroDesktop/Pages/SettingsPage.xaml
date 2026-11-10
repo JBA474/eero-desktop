@@ -84,6 +84,14 @@
                     </DockPanel>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,8"
                                Text="eero Desktop manages eero mesh Wi-Fi networks from Windows, without a phone. It talks to the same eero cloud service as the eero mobile app, using your eero account."/>
+                    <Border BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,10"
+                            BorderBrush="{DynamicResource SystemFillColorCautionBrush}" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}">
+                        <TextBlock x:Name="Disclaimer" TextWrapping="Wrap" AutomationProperties.AutomationId="Disclaimer"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                            <Run FontWeight="SemiBold" Text="Unofficial application."/>
+                            <Run Text="eero Desktop is not developed, endorsed or supported by eero LLC or Amazon.com, Inc. It uses eero's cloud service the same way the eero mobile app does, and eero may change that service at any time. eero is a trademark of eero LLC, an Amazon company. Use at your own risk; for official support, use the eero app or contact eero."/>
+                        </TextBlock>
+                    </Border>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,4" Text="What it can do:"/>
                     <TextBlock TextWrapping="Wrap" Margin="12,0,0,8" Foreground="{DynamicResource TextFillColorSecondaryBrush}" LineHeight="20">
                         • See network health, speed tests and every eero and connected device<LineBreak/>
@@ -114,8 +122,7 @@
                     </TextBlock>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <Button x:Name="DnspyreLicenseButton" Content="View dnspyre License" Click="DnspyreLicense_Click"/>
-                    </StackPanel>                    <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8"
-                               Text="Unofficial — not made, endorsed or supported by eero or Amazon. eero is a trademark of eero LLC."/>
+                    </StackPanel>
                     <ItemsControl x:Name="AboutFacts" ItemTemplate="{StaticResource FactTemplate}" Margin="0,0,0,8"/>
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Open Data Folder" Click="OpenDataFolder_Click"/>

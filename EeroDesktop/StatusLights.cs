@@ -23,7 +23,7 @@ public static class StatusLights
     private static SolidColorBrush Freeze(string hex) { var b = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)); b.Freeze(); return b; }
 
     private static readonly HashSet<string> GoodWords = ["connected", "green", "online", "up", "ok", "active", "enabled", "yes", "up to date", "healthy"];
-    private static readonly HashSet<string> BadWords = ["disconnected", "red", "offline", "down", "failed", "error", "unreachable", "no internet", "still down", "no"];
+    private static readonly HashSet<string> BadWords = ["disconnected", "red", "offline", "down", "failed", "error", "unreachable", "no internet", "still down", "no", "problem"];
 
     /// <summary>Connected/green/online → Good; disconnected/red/offline → Bad; anything else (yellow, degraded, unknown) → Warning.</summary>
     public static Level LevelOf(string? status)

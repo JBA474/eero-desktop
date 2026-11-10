@@ -17,21 +17,24 @@
             <StackPanel Style="{StaticResource Toolbar}">
                 <TextBlock Text="Search" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                 <TextBox x:Name="SearchBox" Width="260" TextChanged="Filter_Changed"/>
-                <CheckBox x:Name="OnlineOnly" Content="Online Only" Margin="16,0,0,0" IsChecked="True" Click="Filter_Changed"/>
+                <CheckBox x:Name="OnlineOnly" Content="Online Only" Margin="16,0,0,0" IsChecked="True" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
+                <CheckBox x:Name="NeedsNameOnly" Content="Needs a Name" Margin="16,0,0,0" Checked="Filter_Changed" Unchecked="Filter_Changed"
+                          ToolTip="Devices eero only knows by a machine-made name (MAC address, network hostname, or a random default). Select one and press Rename for a suggested name."/>
             </StackPanel>
         </StackPanel>
         <DataGrid x:Name="Grid" MouseDoubleClick="Details_Click">
             <DataGrid.Columns>
-                <!-- Proportional widths so every column fits the window; MinWidth keeps text readable (the grid scrolls sideways below that). -->
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="2*" MinWidth="140"/>
-                <DataGridTemplateColumn Header="Status" CellTemplate="{StaticResource StatusCell}" SortMemberPath="Status" Width="0.8*" MinWidth="84"/>
-                <DataGridTextColumn Header="IP Address" Binding="{Binding Ip}" Width="1.1*" MinWidth="96"/>
-                <DataGridTextColumn Header="MAC" Binding="{Binding Mac}" Width="1.3*" MinWidth="120"/>
-                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}" Width="1.2*" MinWidth="90"/>
-                <DataGridTextColumn Header="Connection" Binding="{Binding Connection}" Width="1.2*" MinWidth="90"/>
-                <DataGridTextColumn Header="Connected To" Binding="{Binding Source}" Width="1.1*" MinWidth="90"/>
-                <DataGridTextColumn Header="Profile" Binding="{Binding Profile}" Width="0.9*" MinWidth="70"/>
-                <DataGridTextColumn Header="Last Active" Binding="{Binding LastActive}" Width="1*" MinWidth="80"/>
+                <!-- Short columns size to their header and content (never cut off); Name, Manufacturer and Connection share
+                     the remaining width. Below the minimums the grid scrolls sideways. -->
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="1.6*" MinWidth="140"/>
+                <DataGridTemplateColumn Header="Status" CellTemplate="{StaticResource StatusCell}" SortMemberPath="Status" Width="Auto" MinWidth="84"/>
+                <DataGridTextColumn Header="IP Address" Binding="{Binding Ip}" Width="Auto"/>
+                <DataGridTextColumn Header="MAC" Binding="{Binding Mac}" Width="Auto"/>
+                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}" Width="1*" MinWidth="100"/>
+                <DataGridTextColumn Header="Connection" Binding="{Binding Connection}" Width="1.2*" MinWidth="120"/>
+                <DataGridTextColumn Header="Connected To" Binding="{Binding Source}" Width="Auto"/>
+                <DataGridTextColumn Header="Profile" Binding="{Binding Profile}" Width="Auto"/>
+                <DataGridTextColumn Header="Last Active" Binding="{Binding LastActive}" Width="Auto"/>
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

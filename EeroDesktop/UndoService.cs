@@ -72,6 +72,47 @@ public static class UndoService
                 $"Turn {J.Label(f.Label)} {(was ? "on" : "off")} again", "toggle", new JsonObject { ["key"] = f.Key, ["value"] = was },
                 f.Risk == AdvancedPage.Risk.RestartsAll);
 
+    // ------------------------------------------------------------------ saved requests (devices, profiles, Wi-Fi name)
+
+    /// <summary>One API call to replay: PUT/POST with a JSON or form body, or DELETE.</summary>
+    public sealed record Request(string Method, string Url, JsonNode? Json = null, Dictionary<string, string?>? Form = null)
+    {
+        public JsonObject ToJson()
+        {
+            var o = new JsonObject { ["method"] = Method, ["url"] = Url };
+            if (Json is not null) o["json"] = Json.DeepClone();
+            if (Form is not null) o["form"] = new JsonObject(Form.Select(kv => KeyValuePair.Create(kv.Key, (JsonNode?)JsonValue.Create(kv.Value))));
+            return o;
+        }
+
+        public static Request FromJson(JsonNode? o) => new(o.S("method") ?? "PUT", o.S("url") ?? "",
+            o?["json"]?.DeepClone(),
+            o?["form"] is JsonObject f ? f.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString()) : null);
+
+        public Task SendAsync(EeroClient api) => (Method.ToUpperInvariant(), Json, Form) switch
+        {
+            ("DELETE", _, _) => api.DeleteAsync(Url),
+            ("POST", _, { } form) => api.PostFormAsync(Url, form),
+            ("POST", var json, _) => api.PostJsonAsync(Url, json as JsonObject ?? new JsonObject()),
+            (_, _, { } form) => api.PutFormAsync(Url, form),
+            _ => api.PutJsonAsync(Url, Json as JsonObject ?? new JsonObject()),
+        };
+    }
+
+    /// <summary>
+    /// Saves a change made with a direct API call (rename, pause, block, profile…) together with the call that undoes it
+    /// and the call that redoes it. Call only after the change succeeded.
+    /// </summary>
+    /// <param name="done">What was just done, e.g. "Renamed TV to Living Room TV".</param>
+    /// <param name="undoText">What undo does, e.g. "Rename it back to TV".</param>
+    /// <param name="undoneText">What undo will have done, e.g. "Renamed Living Room TV back to TV".</param>
+    /// <param name="redoText">What undoing the undo does, e.g. "Rename it to Living Room TV again".</param>
+    public static void RecordRequest(string done, string undoText, string undoneText, string redoText, Request undo, Request redo, bool restartsAll = false)
+        => Record(new(AppState.Current.NetworkId, DateTime.UtcNow, done, undoText, "request", new JsonObject
+        {
+            ["undo"] = undo.ToJson(), ["redo"] = redo.ToJson(), ["undone_text"] = undoneText, ["redo_text"] = redoText,
+        }, restartsAll));
+
     // ------------------------------------------------------------------ undoing
 
     /// <summary>Puts back what the entry saved. Returns false when the network already had that value (nothing sent).</summary>
@@ -91,6 +132,22 @@ public static class UndoService
                 var f = AdvancedPage.FindFeature(e.Args.S("key") ?? "") ?? throw new InvalidOperationException("That setting is no longer available.");
                 var value = e.Args.B("value");
                 return await s.ChangeIfNeededAsync(n => f.Read(n) == value, () => f.Write(value), Toggle(f, value));
+            case "request":
+                await Request.FromJson(e.Args["undo"]).SendAsync(s.Api);
+                // The undo is itself a change: save the reverse so pressing Undo again redoes.
+                Record(e with
+                {
+                    Utc = DateTime.UtcNow,
+                    Done = e.Args.S("undone_text") ?? "Undid: " + e.Done,
+                    UndoText = e.Args.S("redo_text") ?? "Redo: " + e.Done,
+                    Args = new JsonObject
+                    {
+                        ["undo"] = e.Args["redo"]?.DeepClone(), ["redo"] = e.Args["undo"]?.DeepClone(),
+                        ["undone_text"] = e.Done, ["redo_text"] = e.UndoText,
+                    },
+                });
+                await s.ReloadNetworkAsync();
+                return true;
             default:
                 throw new InvalidOperationException($"Unknown change type '{e.Kind}'.");
         }
