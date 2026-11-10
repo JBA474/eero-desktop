@@ -1,0 +1,65 @@
+
+### ProfileDeviceUpdateRequest  (com\eero\android\core\model\api\network\profiles\ProfileDeviceUpdateRequest.java)
+  url                                String
+
+### HostInfoList  (com\eero\android\core\model\api\network\settings\dns\HostInfoList.java)
+
+### ProfilePauseState  (com\eero\android\core\model\api\network\profiles\ProfilePauseState.java)
+  schedule                           ScheduledPause
+  value                              String
+
+### Speed  (com\eero\android\core\model\api\network\Speed.java)
+
+### SpeedValue  (com\eero\data\network\device\speed\SpeedValue.java)
+
+### Connection  (com\eero\android\core\model\api\network\Connection.java)
+  value                              String
+
+### Connection  (com\eero\android\core\model\api\network\settings\Connection.java)
+
+### Clients  (com\eero\android\core\model\api\network\Clients.java)
+  count                              Integer
+  url                                String
+
+### PreferredUpdateHour  (com\eero\android\core\model\api\network\updates\PreferredUpdateHour.java)
+  preferred_update_hour              Integer
+
+### TimezoneHolder  (com\eero\android\core\model\api\network\create\TimezoneHolder.java)
+  geo_ip                             String
+  value                              String
+
+### LastUserUpdate  (com\eero\android\core\model\api\network\updates\LastUserUpdate.java)
+
+### CustomDhcp  (com\eero\android\core\model\api\network\settings\dhcp\CustomDhcp.java)
+  end_ip                             String
+  start_ip                           String
+  subnet_ip                          String
+  subnet_mask                        String
+
+### LeaseInfo  (com\eero\android\core\model\api\network\settings\dhcp\LeaseInfo.java)
+  ip                                 String
+  mask                               String
+  router                             String
+
+### EeroStatus  (com\eero\data\network\api\model\eero\EeroStatus.java)
+  textResource                       int
+  value                              String
+
+### ModelVariant  (com\eero\data\network\api\model\eero\ModelVariant.java)
+
+### DnsServer  (com\eero\android\core\model\api\network\settings\dns\DnsServer.java)
+  ipv4                               List<String>
+  ipv6                               List<String>
+  name                               String
+
+### ProfileAllowance  (com\eero\android\core\model\api\network\profiles\ProfileAllowance.java)
+  daily                              int
+  enabled                            boolean
+  remaining                          int
+
+### DeviceAuth  (com\eero\android\core\model\api\network\devices\DeviceAuth.java)
+  titleRes                           int
+  value                              String
+
+### IPv6  (com\eero\android\core\model\api\network\IPv6.java)
+  name_servers                       IP6NameServers

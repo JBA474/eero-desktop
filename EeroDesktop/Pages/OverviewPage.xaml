@@ -1,0 +1,45 @@
+<local:PageBase x:Class="EeroDesktop.Pages.OverviewPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <TextBlock x:Name="NameText" Style="{StaticResource PageTitle}"/>
+            <TextBlock x:Name="SubText" Style="{StaticResource PageSubtitle}"/>
+
+            <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Run Speed Test" Style="{StaticResource PrimaryButton}" Click="SpeedTest_Click"/>
+                <Button Content="Restart Network" Style="{StaticResource DangerButton}" Click="Restart_Click"/>
+                <Button Content="Rename Network" Click="Rename_Click"/>
+                <Button Content="View Raw JSON" Click="Raw_Click"/>
+            </StackPanel>
+
+            <UniformGrid Columns="2">
+                <Border Style="{StaticResource Card}" Margin="0,0,7,14">
+                    <StackPanel>
+                        <TextBlock Text="Internet" Style="{StaticResource SectionTitle}"/>
+                        <ItemsControl x:Name="InternetFacts" ItemTemplateSelector="{StaticResource Facts}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="7,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Latest Speed Test" Style="{StaticResource SectionTitle}"/>
+                        <ItemsControl x:Name="SpeedFacts" ItemTemplateSelector="{StaticResource Facts}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="0,0,7,14">
+                    <StackPanel>
+                        <TextBlock Text="Network" Style="{StaticResource SectionTitle}"/>
+                        <ItemsControl x:Name="NetworkFacts" ItemTemplateSelector="{StaticResource Facts}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="7,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Software" Style="{StaticResource SectionTitle}"/>
+                        <ItemsControl x:Name="SoftwareFacts" ItemTemplateSelector="{StaticResource Facts}"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
+</local:PageBase>

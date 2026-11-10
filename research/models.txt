@@ -1,0 +1,420 @@
+
+### Token  (com\eero\android\core\model\api\user\Token.java)
+  user_token                         String
+
+### DataResponse  (com\eero\android\core\model\api\base\DataResponse.java)
+  data                               T
+
+### DataResponse  (com\eero\data\network\api\base\DataResponse.java)
+  data                               T
+  meta                               Meta
+
+### Network  (com\eero\android\core\model\api\network\core\Network.java)
+  accessories                        List<Accessory>
+  auto_setup_mode                    AutoSetupMode
+  business_license_expiration_date   Date
+  capabilities                       NetworkCapabilities
+  cellular_backup                    CellularBackup
+  clients                            Clients
+  connection                         Connection
+  connected_device_count             NetworkDevicesCount
+  dhcp                               Dhcp
+  dns                                Dns
+  ddns                               DynamicDns
+  eb_user_license_config_status      PremiumStatusStates
+  eeros                              Eeros
+  flags                              List<NetworkFlag>
+  gateway_ip                         String
+  geo_ip                             GeoIpInfo
+  guest_network                      GuestNetwork
+  has_stacked_network_temp_admin     boolean
+  health                             NetworkHealth
+  image_assets                       ImageAssets
+  ip_settings                        GatewayIpSettings
+  ipv6                               IPv6
+  ipv6_lease                         Ipv6Lease
+  alexa_skill                        boolean
+  amazon_account_linked              boolean
+  amazon_device_nickname             boolean
+  ffs                                boolean
+  band_steering                      boolean
+  ipv6_upstream                      boolean
+  pppoe_enabled                      boolean
+  sqm                                boolean
+  thread                             boolean
+  upnp                               boolean
+  wpa3                               boolean
+  last_reboot                        Date
+  lease                              Lease
+  messages                           List<NetworkMessage>
+  mlo_mode                           MultiLinkOperationMode
+  nat_port_randomization             boolean
+  organization                       Organization
+  password                           String
+  power_saving                       boolean
+  power_saving_schedule_enabled      Boolean
+  pppoe                              NetworkPppoeConfig
+  pppoe_username                     String
+  premium_details                    PremiumDetails
+  premium_dns                        DnsPolicySettings
+  premium_status                     PremiumStatusStates
+  proxied_nodes                      ProxiedNodes
+  rebooting                          Reboot
+  resources                          NetworkResources
+  ring_lte                           RingLte
+  smart_home_hub                     boolean
+  speed                              Speed
+  speedtest_experiments              SpeedTestExperiments
+  temporary_flags                    TemporaryFlags
+  timezone                           TimezoneHolder
+  network_customer_type              NetworkType
+  updates                            NetworkUpdates
+  upstream                           List<UpstreamDevice>
+  vlan                               String
+  wan_ip                             String
+  wan_type                           WanType
+  -- nested LteDisplayStatus
+  lteStatusStringRes                 Integer
+  networkStatusStringRes             Integer
+
+### NetworkResources  (com\eero\android\core\model\api\network\resources\NetworkResources.java)
+  burst_reporters                    String
+  devices                            String
+  diagnostics                        String
+  eeros                              String
+  forwards                           String
+  guestnetwork                       String
+  password                           String
+  profiles                           String
+  reboot                             String
+  reservations                       String
+  routing                            String
+  settings                           String
+  speedtest                          String
+  support                            String
+  thread                             String
+  transfer                           String
+  updates                            String
+
+### NetworkDevice  (com\eero\android\core\model\api\network\devices\NetworkDevice.java)
+  amazon_devices_detail              AmazonDeviceDetail
+  connection_type                    ConnectionType
+  connectivity                       ConnectivityData
+  auth                               DeviceAuth
+  device_type                        DeviceType
+  display_name                       String
+  eui64                              String
+  first_active                       Date
+  interface                          FrequencyData
+  hostname                           String
+  inferred_make                      String
+  inferred_model                     String
+  ip                                 String
+  ips                                List<String>
+  ipv4                               String
+  ipv6_addresses                     List<Ipv6Address>
+  connected                          boolean
+  blacklisted                        boolean
+  is_guest                           boolean
+  paused                             boolean
+  is_private                         boolean
+  is_proxied_node                    boolean
+  wireless                           boolean
+  last_active                        Date
+  mac                                String
+  manufacturer                       String
+  model                              String
+  model_name                         String
+  multi_link_interfaces              List<FrequencyData>
+  nickname                           String
+  profile                            ProfileRef
+  ring_lte                           RingLte
+  secondary_wan_deny_access          boolean
+  source                             SourceData
+  subnet_kind                        SubnetKind
+  ssid                               String
+  url                                String
+  usage                              DeviceUsage
+
+### NetworkDeviceRequest  (com\eero\android\core\model\api\network\devices\NetworkDeviceRequest.java)
+  mac                                String
+  nickname                           String
+  paused                             Boolean
+  profile                            ProfileDeviceUpdateRequest
+
+### ProfileRef  (com\eero\data\network\api\model\network\profile\ProfileRef.java)
+  name                               String
+  paused                             boolean
+  url                                String
+
+### ConnectivityData  (com\eero\android\core\model\api\network\devices\ConnectivityData.java)
+  score_bars                         Integer
+
+### SourceData  (com\eero\android\core\model\api\network\devices\SourceData.java)
+  display_name                       String
+  is_proxied_node                    Boolean
+  location                           String
+  url                                String
+
+### DeviceUsage  (com\eero\data\network\device\DeviceUsage.java)
+  down_mbps                          Double
+  down_percent_current_usage         Integer
+  up_mbps                            Double
+  up_percent_current_usage           Integer
+
+### FrequencyData  (com\eero\android\core\model\api\network\devices\FrequencyData.java)
+  frequency                          String
+  frequency_unit                     String
+
+### Profile  (com\eero\android\core\model\api\network\profiles\Profile.java)
+  default                            Boolean
+  devices                            List<NetworkDevice>
+  limit                              ProfileAllowance
+  premium_dns                        ProfilePremiumSettings
+  proxied_nodes                      List<ProxiedNodeDevice>
+  resources                          ProfileResources
+  schedule                           ArrayList<ScheduledPause>
+  state                              ProfilePauseState
+  unified_content_filters            UnifiedContentFilters
+
+### ProfileUpdateRequest  (com\eero\android\core\model\api\network\profiles\ProfileUpdateRequest.java)
+  devices                            List<ProfileDeviceUpdateRequest>
+  name                               String
+  paused                             Boolean
+  url                                String
+
+### ProfileResources  (com\eero\android\core\model\api\network\profiles\ProfileResources.java)
+  schedules                          String
+
+### GuestNetwork  (com\eero\android\core\model\api\network\settings\guest\GuestNetwork.java)
+  enabled                            Boolean
+  name                               String
+  password                           String
+  resources                          GuestResources
+  url                                String
+
+### GuestResources  (com\eero\android\core\model\api\network\settings\guest\GuestResources.java)
+  password                           String
+
+### NetworkForward  (com\eero\android\core\model\api\network\settings\forwards\NetworkForward.java)
+
+### NetworkReservation  (com\eero\android\core\model\api\network\settings\reservations\NetworkReservation.java)
+  description                        String
+  ip                                 String
+  mac                                String
+  public_static_ip                   String
+  url                                String
+
+### Eero  (com\eero\android\core\model\api\eero\Eero.java)
+  accessories                        List<Accessory>
+  backup_wan                         BackupWan
+  extended_border_agent_address      String
+  bssids_with_bands                  List<EeroBssidWithBand>
+  cellular_backup                    CellularBackup
+  client_ap_disabled                 Boolean
+  regulatory                         EeroCompliance
+  connected_clients_count            int
+  connected_wired_clients_count      int
+  connected_wireless_clients_count   int
+  connection_type                    ConnectionType
+  state                              String
+  ethernet_addresses                 List<String>
+  ethernet_status                    EthernetStatus
+  ip_address                         String
+  ipv6_addresses                     List<Ipv6Address>
+  gateway                            boolean
+  in_setup_state                     boolean
+  led_on                             boolean
+  is_primary_node                    boolean
+  retrograde_capable                 boolean
+  update_available                   boolean
+  wired                              Boolean
+  joined                             Date
+  last_heartbeat                     Date
+  last_reboot                        Date
+  led_brightness                     int
+  location                           String
+  mac_address                        String
+  mesh_quality_bars                  int
+  messages                           List<EeroMessage>
+  ?DeepLinkScreen.MyNewEero.QUERY_MODEL String
+  model_number                       String
+  model_variant                      ModelVariant
+  network                            NetworkReference
+  nightlight                         Nightlight
+  organization                       Organization
+  os_version                         String
+  port_details                       List<EeroPortDetail>
+  power_info                         PowerInfo
+  provide_device_power               DevicePower
+  power_saving                       PowerSavingInfo
+  provides_wifi                      Boolean
+  reboots                            EeroReboots
+  requires_amazon_pre_authorized_code boolean
+  resources                          EeroResources
+  serial                             String
+  status                             EeroStatus
+  update_status                      OTAUpdateStatus
+  url                                String
+  wifi_bssids                        List<String>
+  bands                              List<String>
+  wireless_upstream_node             WirelessUpstreamNode
+  -- nested Creator
+
+### EeroResources  (com\eero\data\network\api\model\eero\EeroResources.java)
+  connections                        String
+  led_action                         String
+  reboot                             String
+  -- nested Creator
+
+### Eeros  (com\eero\android\core\model\api\network\core\Eeros.java)
+
+### SpeedTest  (com\eero\android\core\model\api\network\SpeedTest.java)
+  date                               Date
+  down_mbps                          Double
+  up_mbps                            Double
+
+### NetworkUpdates  (com\eero\android\core\model\api\network\updates\NetworkUpdates.java)
+
+### NetRules  (com\eero\android\core\model\api\network\settings\firewall\NetRules.java)
+  devices                            Container<Device>
+  forwards                           Container<NetworkForward>
+  pinholes                           Container<Pinhole>
+  reservations                       Container<Reservation>
+  -- nested Device
+  mac                                String
+  nickname                           String
+  url                                String
+  -- nested Reservation
+  description                        String
+  device                             String
+  ip                                 String
+  mac                                String
+  public_static_ip                   String
+  url                                String
+  -- nested Pinhole
+  device                             String
+  port                               String
+  protocol                           String
+  url                                String
+  -- nested Protocol
+  value                              String
+  -- nested Container
+  data                               List<T>
+  url                                String
+
+### DnsPolicySettings  (com\eero\android\core\model\api\network\premium\DnsPolicySettings.java)
+  ad_block_settings                  AdBlockSettings
+  any_policies_enabled_for_network   boolean
+  dns_policies                       Map<DnsPolicySlug, Boolean>
+  dns_policies_enabled               boolean
+
+### AdBlockSettings  (com\eero\android\core\model\api\network\premium\AdBlockSettings.java)
+  enabled                            boolean
+  profiles                           List<String>
+
+### AdBlockSettingsRequest  (com\eero\android\core\model\api\network\AdBlockSettingsRequest.java)
+  enable                             boolean
+  profiles                           List<String>
+
+### ScheduledPause  (com\eero\android\core\model\api\network\profiles\schedules\ScheduledPause.java)
+  days                               Set<Days>
+  enabled                            boolean
+  end                                String
+  name                               String
+  start                              String
+  url                                String
+
+### Dns  (com\eero\android\core\model\api\network\settings\dns\Dns.java)
+  caching                            Boolean
+  custom                             HostInfoList
+  default_test_servers               List<DnsServer>
+  mode                               DnsMode
+  parent                             HostInfoList
+
+### Dhcp  (com\eero\android\core\model\api\network\settings\dhcp\Dhcp.java)
+
+### Lease  (com\eero\android\core\model\api\network\settings\dhcp\Lease.java)
+  ?DHCP                              LeaseInfo
+  mode                               String
+  ?STATIC                            LeaseInfo
+  -- nested Companion
+
+### GatewayIpSettings  (com\eero\android\core\model\api\network\settings\GatewayIpSettings.java)
+  double_nat                         boolean
+  public_ip                          String
+
+### NetworkDevicesCount  (com\eero\android\core\model\api\network\NetworkDevicesCount.java)
+  on_network                         int
+  recently_on_network                int
+
+### NetworkHealth  (com\eero\android\core\model\api\network\NetworkHealth.java)
+  eero_network                       EeroNetworkHealth
+  internet                           InternetHealth
+  isUpdating                         boolean
+  -- nested NetworkStatus
+  stringRes                          int
+
+### InternetHealth  (com\eero\android\core\model\api\network\health\InternetHealth.java)
+  isp_up                             Boolean
+  status                             InternetHealthStatuses
+
+### EeroNetworkHealth  (com\eero\android\core\model\api\network\health\EeroNetworkHealth.java)
+  status                             NetworkHealthStatuses
+
+### OTAUpdateStatus  (com\eero\data\network\api\model\eero\OTAUpdateStatus.java)
+  support_expiration_date            String
+
+### User  (com\eero\android\core\model\api\user\User.java)
+  auth                               AuthenticationType
+  business_details                   BusinessDetails
+  can_migrate_to_amazon_login        boolean
+  consents                           Consents
+  email                              Email
+  epi_status                         String
+  image_assets                       ImageAssets
+  is_beta_bug_reporter_eligible      boolean
+  eero_for_business                  boolean
+  is_external                        Boolean
+  is_grandfathering                  boolean
+  is_premium_capable                 boolean
+  log_id                             String
+  mdu_program                        boolean
+  name                               String
+  networks                           NetworkReferences
+  organization_id                    String
+  phone                              Phone
+  premium_details                    PremiumDetails
+  premium_status                     PremiumStatusStates
+  push_settings                      PushSettings
+  report_issue                       ReportIssue
+  role                               UserRole
+  subscription_referral_capable      boolean
+  trust_certificates_etag            String
+
+### NetworkReferences  (com\eero\android\core\model\api\network\core\NetworkReferences.java)
+
+### NetworkReference  (com\eero\data\network\api\model\network\NetworkReference.java)
+  access_expires_on                  Date
+  created                            Date
+  eeros_status                       String
+  freq_reboots                       Boolean
+  amazon_directed_id                 String
+  nickname_label                     String
+  slow_network                       Boolean
+  status                             String
+  transfer_status                    TransferStatus
+  update_available                   Boolean
+
+### Ipv6Lease  (com\eero\android\core\model\api\network\settings\Ipv6Lease.java)
+  name_servers                       List<String>
+  prefix                             String
+  subnets                            List<String>
+
+### WanType  (com\eero\android\core\model\api\network\WanType.java)
+  displayStringRes                   Integer
+
+### Nightlight  (com\eero\data\network\api\model\eero\Nightlight.java)
+  brightness_percentage              Integer
+  enabled                            boolean
+  schedule                           NightlightSchedule

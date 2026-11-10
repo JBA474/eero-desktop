@@ -1,0 +1,852 @@
+
+### com\eero\android\api\service\jira\IJiraService.java
+POST   "/issue_tracker/bug/create"
+       @Multipart
+       Object createEnhancedIssue(@PartMap Map<String, RequestBody> map, @Part List<MultipartBody.Part> list, Continuation<? super DataResponse<JiraReportIssueResponse>> continuation);
+POST   "/issue_tracker/bug/create"
+       @Multipart
+       Single<EeroBaseResponse> createIssue(@PartMap Map<String, RequestBody> eeros, @PartMap Map<String, RequestBody> devices, @PartMap Map<String, RequestBody> labels, @Part("issue_timestamp") RequestBody issueTimestamp, @Part MultipartBody.Part reportScreen, @Part(ProfileOnboardingElements.description) RequestBody description, @Part("summary") RequestBody summary, @Part(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) RequestBody networkId);
+GET    "/issue_tracker/labels"
+       Single<DataResponse<JiraLabels>> getLabels();
+
+### com\eero\android\api\service\log\ILogService.java
+POST   "2.2/log"
+       Completable log(@Body LogEvent logEvent);
+POST   "2.2/log"
+       Completable upload(@Body RequestBody requestBody);
+POST   "2.2/log/helix"
+       Single<Response<Void>> uploadHelixMetrics(@Body RequestBody requestBody);
+
+### com\eero\android\api\service\sso\ISsoService.java
+GET    "/api/v1/providers"
+       Single<List<IdentityProvider>> getProviders(@Query("assetType") String str);
+GET    "/api/v1/providers/{code}"
+       Single<IdentityProvider> getProvider(@Path(DeepLinkScreen.RespondNetworkInvite.QUERY_INVITE_CODE) String str, @Query("assetType") String str2);
+
+### com\eero\android\api\service\zendesk\IZendeskService.java
+POST   "2.2/zendesk/create"
+       @Multipart
+       Object createEnhancedIssue(@PartMap Map<String, RequestBody> map, @Part List<MultipartBody.Part> list, Continuation<? super DataResponse<SalesforceReportIssueResponse>> continuation);
+POST   "2.2/zendesk/create"
+       @Multipart
+       Single<EeroBaseResponse> createIssue(@PartMap Map<String, RequestBody> eeros, @PartMap Map<String, RequestBody> devices, @PartMap Map<String, RequestBody> labels, @Part("issue_timestamp") RequestBody issueTimestamp, @Part MultipartBody.Part reportScreen, @Part(ProfileOnboardingElements.description) RequestBody description, @Part("summary") RequestBody summary, @Part(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) RequestBody networkId);
+
+### com\eero\android\core\api\appconfiguration\IAppConfigurationService.java
+GET    "2.2/app_configuration"
+       Single<DataResponse<AppConfiguration>> getAppConfiguration(@Query("networkId") String networkId);
+
+### com\eero\android\core\api\conversations\IConversationsService.java
+GET    "2.2/conversations"
+       Object conversations(@Query("networkId") String str, @Query("excludeEmpty") boolean z, Continuation<? super DataResponse<ConversationsResponse>> continuation);
+PUT    "2.2/conversations/feedbacks"
+       Object sendFeedback(@Body FeedbackRequest feedbackRequest, Continuation<? super DataResponse<Unit>> continuation);
+GET    "2.2/conversations/recommended"
+       Object recommended(@Query("networkId") String str, Continuation<? super DataResponse<RecommendedResponse>> continuation);
+POST   "2.2/conversations/token"
+       Object generateToken(@Body ConversationTokenRequest conversationTokenRequest, Continuation<? super DataResponse<ConversationTokenResponse>> continuation);
+POST   "2.2/conversations/warmup"
+       Object warmup(@Body ConversationRequest conversationRequest, Continuation<? super DataResponse<WarmupResponse>> continuation);
+GET    "2.2/conversations/{id}"
+       Object conversation(@Path("id") String str, Continuation<? super DataResponse<ConversationResponse>> continuation);
+
+### com\eero\android\core\api\directedid\IDirectedIdService.java
+GET    "2.2/directedid"
+       Object coGetDirectedId(@Query("d") int i, @Query("i") int i2, @Query("p") int i3, Continuation<? super DataResponse<DirectedIdResponse>> continuation);
+GET    "2.2/directedid"
+       Single<DataResponse<DirectedIdResponse>> getDirectedId(@Query("d") int directedIdType, @Query("i") int identifier, @Query("p") int partner);
+GET    "2.2/directedid/uuid"
+       Object coGetDirectedIdForUuid(@Query("d") int i, @Query("i") String str, @Query("p") int i2, Continuation<? super DataResponse<DirectedIdResponse>> continuation);
+
+### com\eero\android\core\api\eero\IEeroService.java
+POST   "2.2/eeros"
+       Single<DataResponse<Eero>> addEeroWithSerial(@Field("serial") String str, @Field("location") String str2, @Field(HealthCheckResults.NETWORK) String str3, @Query("requireSession") boolean z, @Query(DefineEeroLocationFragment.SETUP_TYPE) String str4);
+POST   "2.2/eeros"
+       Single<DataResponse<Eero>> validateEero(@Field("serial") String str, @Field("location") String str2, @Query("requireSession") boolean z, @Query("is_gateway") boolean z2);
+POST   "2.2/eeros"
+       Single<DataResponse<Eero>> validateEeroSerial(@Field("serial") String str, @Query("requireSession") boolean z);
+GET    "2.2/eeros/{eero_id}/authorization_status"
+       Single<DataResponse<EeroAuthorizationResponse>> checkIsAuthorizedEero(@Path("eero_id") String str, @Query(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String str2);
+POST   "2.2/eeros/{id}/action"
+       Single<EeroBaseResponse> performNodeAction(@Path("id") String str, @Body NodeActionRequest nodeActionRequest);
+POST   "2.2/eeros/{id}/nightlight/override"
+       Single<EeroBaseResponse> previewNightlight(@Path("id") String str, @Field("brightness_percentage") int i);
+POST   "2.2/eeros/{id}/ports/{interface_number}/action"
+       Single<EeroBaseResponse> performPortAction(@Path("id") String str, @Path("interface_number") String str2, @Body PortActionRequest portActionRequest);
+POST   "2.2/eeros/{serial}/led_cycle"
+       Single<DataResponse<Eero>> cycleLED(@Path("serial") String str, @Field("colors[]") List<String> list, @Field("duration") int i, @Field("time_per_color") int i2);
+GET    "2.2/eeros/{serial}/license_expiration"
+       Single<DataResponse<NetworkExpirationDate>> getBusinessLicense(@Path("serial") String str, @Query(HealthCheckResults.NETWORK) String str2, @Query("replaced_eero") String str3);
+POST   "2.2/eeros/{serial}/pppoe"
+       Single<DataResponse<PppoeEncryptedCredentials>> encryptPppoeCredentials(@Path("serial") String str, @Body PppoeEncryptionRequest pppoeEncryptionRequest);
+GET    "2.2/eeros/{serial}/pre_setup_config"
+       Single<DataResponse<SetupPreconfigs>> getSetupPreconfigs(@Path("serial") String str);
+GET    "2.2/eeros/{serial}/support"
+       Single<DataResponse<DeviceSupportInfo>> getSupportInfo(@Path("serial") String str);
+PUT    <@Url dynamic>
+       Single<DataResponse<Eero>> addEero(@Url String str, @Field(HealthCheckResults.NETWORK) URI uri);
+DELETE <@Url dynamic>
+       Single<EeroBaseResponse> deleteEero(@Url String str);
+GET    <@Url dynamic>
+       Single<DataResponse<ConnectionsResponse>> getConnections(@Url String str);
+GET    <@Url dynamic>
+       Single<DataResponse<List<NetworkDevice>>> getDevices(@Url String str);
+GET    <@Url dynamic>
+       Single<DataResponse<Eero>> getEero(@Url String str);
+GET    <@Url dynamic>
+       Single<DataResponse<List<Eero>>> getEeros(@Url String str);
+GET    <@Url dynamic>
+       Single<DataResponse<Nightlight>> getNightlightSettings(@Url String str);
+PUT    <@Url dynamic>
+       Single<DataResponse<Nightlight>> putNightlightSettings(@Url String str, @Body Nightlight nightlight);
+POST   <@Url dynamic>
+       Single<EeroBaseResponse> reboot(@Url String str, @Body Object obj);
+PUT    <@Url dynamic>
+       Single<DataResponse<Eero>> setLedBrightness(@Url String str, @Field("led_brightness") int i);
+PUT    <@Url dynamic>
+       Single<DataResponse<Eero>> toggleLedLight(@Url String str, @Field("led_on") boolean z);
+PUT    <@Url dynamic>
+       Single<DataResponse<Eero>> updateEeroLocation(@Url String str, @Field("location") String str2);
+
+### com\eero\android\core\api\entitledfeatures\IEntitledFeatures.java
+GET    "/2.2/entitlements/networks/{id}/features"
+       Object getFeatures(@Path("id") String str, Continuation<? super DataResponse<EntitledFeaturesResponse>> continuation);
+GET    "/2.2/entitlements/networks/{id}/upsell_features"
+       Object getUpsells(@Path("id") String str, @Query("supports_external_payment_links") boolean z, @Query("include_pricing") boolean z2, Continuation<? super DataResponse<UpsellFeaturesResponse>> continuation);
+
+### com\eero\android\core\api\network\INetworkService.java
+POST   "/2.3/networks"
+       Single<DataResponse<Network>> createNetwork(@Body CreateNetworkRequest createNetworkPost);
+PUT    "/2.3/networks/{id}/devices/secondary_wan_config"
+       Single<DataResponse<BackupInternetDeviceAccess>> configureDevicesSecondaryWanAccess(@Path("id") String networkId, @Body BackupInternetDeviceAccess requestBody);
+PUT    "/2.3/networks/{id}/devices/{mac}"
+       Single<EeroBaseResponse> setSecondaryWanAccess(@Path("id") String networkId, @Path("mac") String mac, @Body SecondaryWanAccess type);
+GET    "/2.3/networks/{id}/pending_eeros"
+       Single<DataResponse<List<PendingNode>>> pendingEeros(@Path("id") String networkId);
+GET    "/2.3/networks/{networkId}/multistaticip"
+       Single<DataResponse<MultiStaticIpResponse>> getMultiStaticIpConfiguration(@Path("networkId") String networkId);
+PUT    "/2.3/networks/{networkId}/multistaticip"
+       Single<DataResponse<MultiStaticIpResponse>> saveMultiStaticIpConfiguration(@Path("networkId") String networkId, @Body MultiStaticIpRequest body);
+POST   "/2.3/networks/{networkId}/placement_rating/{eero_serial}"
+       Single<DataResponse<PlacementResult>> getPlacementTestResult(@Path("networkId") String networkId, @Path("eero_serial") String eeroSerial, @Body BluetoothPlacementTestRequest data);
+GET    "/2.3/networks/{networkId}/placement_test/{serial}"
+       Single<DataResponse<List<PlacementResult>>> getPlacementTestResults(@Path("networkId") String networkId, @Path("serial") String serial);
+POST   "/2.3/networks/{networkId}/placement_test/{serial}"
+       Single<Response<Void>> runPlacementTest(@Path("networkId") String networkId, @Path("serial") String serial);
+POST   "/2.3/networks/{networkId}/shh/start_zigbee_discovery"
+       Single<Response<Void>> runZigbeeDeviceDiscovery(@Path("networkId") String networkId);
+GET    "/2.4/networks/{networkId}/placement/wifi_coverage_scan"
+       Object wifiCoverageScan(@Path("networkId") String str, @Query("allDevices") Boolean bool, Continuation<? super DataResponse<WifiCoverageScanResponse>> continuation);
+GET    "/2.4/networks/{networkId}/placement/wifi_generation_scan"
+       Object wifiGenerationScan(@Path("networkId") String str, @Query("allDevices") Boolean bool, Continuation<? super DataResponse<WifiGenerationScanResponse>> continuation);
+PUT    "/test/networks/all/dnsprovider"
+       Single<EeroBaseResponse> switchDnsProvider(@Body JsonObject dnsProviderOptions);
+POST   "/test/networks/{id}/data_usage/push_notification"
+       Single<EeroBaseResponse> sendDataUsageReportTestPush(@Path("id") String networkId);
+POST   "/test/networks/{id}/push_network_scheduled_update_reminder"
+       Single<EeroBaseResponse> sendUpdateReminderTestNotification(@Path("id") String networkId, @Body JsonObject pushOptions);
+POST   "/test/networks/{id}/push_network_updated_message"
+       Single<EeroBaseResponse> sendNetworkUpdatedTestPush(@Path("id") String networkId, @Body JsonObject pushOptions);
+POST   "/test/networks/{id}/push_new_client_message"
+       Single<EeroBaseResponse> sendNewDeviceTestPush(@Path("id") String networkId, @Body JsonObject pushOptions);
+POST   "2.2/amazon/networks/{network}/account_link"
+       Single<DataResponse<Network>> linkAmazonAccount(@Path(HealthCheckResults.NETWORK) String networkId, @Field("directed_id") String directedId, @Field("full_name") String fullName, @Field("map_token") String mapToken);
+POST   "2.2/amazon/networks/{network}/account_unlink"
+       Single<EeroBaseResponse> unlinkAmazonAccount(@Path(HealthCheckResults.NETWORK) String networkId);
+POST   "2.2/amazon/networks/{network}/preauthorized_code"
+       Single<EeroBaseResponse> sendAmazonLinkCodes(@Path(HealthCheckResults.NETWORK) String networkId, @Field("preauthorized_codes[]") List<String> preAuthCodes, @Field("map_token") String mapToken);
+GET    "2.2/consents/network"
+       Single<DataResponse<List<OptInAgreement>>> getNetworkOptInAgreements(@Query("serial") String serial);
+GET    "2.2/eero_models/capabilities"
+       Single<DataResponse<List<EeroModelCapability>>> eeroModelCapability(@Query("networkId") String networkId);
+POST   "2.2/eeros/networks/{networkId}/notify_swap"
+       Object notifyNodeSwap(@Path("networkId") String str, @Body NofifyNodeSwapRequest nofifyNodeSwapRequest, Continuation<? super Response<Void>> continuation);
+GET    "2.2/eeros/{id}/firmware_update/history"
+       Object getEeroFirmwareUpdateHistory(@Path("id") String str, @Query("limit") int i, @Query("offset") int i2, Continuation<? super FirmwareUpdateHistoryResponse> continuation);
+POST   "2.2/inviteQuery"
+       Single<DataResponse<InviteQueryResponse>> getInviteQuery(@Body InviteQueryRequest inviteQueryRequest);
+POST   "2.2/license_keys"
+       Object activateLicenseKey(@Body ActivateLicenseKeyRequestBody activateLicenseKeyRequestBody, Continuation<? super DataResponse<LicenseKeyResponse>> continuation);
+POST   "2.2/license_keys"
+       Object validateLicenseKey(@Body ValidateLicenseKeyRequestBody validateLicenseKeyRequestBody, Continuation<? super DataResponse<LicenseKeyResponse>> continuation);
+GET    "2.2/managed_summary"
+       Single<DataResponse<NetworksManagedOverview>> getNetworksManagedOverview();
+GET    "2.2/network_transfers/pending"
+       Object getPendingNetworkTransfers(@Query("token") Integer num, Continuation<? super DataResponse<PendingTransfersData>> continuation);
+POST   "2.2/network_transfers/{id}/accept"
+       Object acceptNetworkTransfer(@Path("id") int i, Continuation<? super DataResponse<AcceptNetworkTransferResponse>> continuation);
+POST   "2.2/network_transfers/{id}/deny"
+       Object denyNetworkTransfer(@Path("id") int i, Continuation<? super EeroBaseResponse> continuation);
+GET    "2.2/networks"
+       Object getNetworks(Continuation<? super DataResponse<NetworksResponse>> continuation);
+GET    "2.2/networks/{id}/app_events"
+       Object getNetworkEvents(@Path("id") String str, @Query("page_size") int i, @Query("timestamp") String str2, Continuation<? super DataResponse<NetworkEvents>> continuation);
+POST   "2.2/networks/{id}/debug_action"
+       Single<EeroBaseResponse> triggerDebugAction(@Path("id") String networkId, @Query("entry_point") String entryPoint);
+POST   "2.2/networks/{id}/debug_action"
+       Single<EeroBaseResponse> triggerDebugAction(@Path("id") String networkId, @Query("entry_point") String entryPoint, @Body DebugAction debugAction);
+PUT    "2.2/networks/{id}/devices/{mac}"
+       Single<EeroBaseResponse> setDeviceType(@Path("id") String networkId, @Path("mac") String mac, @Body DeviceTypeData type);
+GET    "2.2/networks/{id}/devices/{mac}/labels"
+       Single<DataResponse<DeviceLabels>> getLabelsForDevice(@Path("id") String networkId, @Path("mac") String mac);
+PUT    "2.2/networks/{id}/devices/{mac}/labels"
+       Single<EeroBaseResponse> labelDevice(@Path("id") String networkId, @Path("mac") String mac, @Query("make_label") String make, @Query("model_label") String model, @Query("version_label") String version, @Query("type_label") String type);
+GET    "2.2/networks/{id}/fast_transition"
+       Single<DataResponse<FastTransitionStatus>> getFastTransitionStatus(@Path("id") String networkId);
+PUT    "2.2/networks/{id}/fast_transition"
+       Single<EeroBaseResponse> updateFastTransitionStatus(@Path("id") String networkId, @Body FastTransitionStatus status);
+PUT    "2.2/networks/{id}/flags/{name}"
+       Single<DataResponse<NetworkFlag>> updateFlag(@Path("id") String networkId, @Path("name") String flagName, @Field("value") String value);
+PUT    "2.2/networks/{id}/label?labelType=SpecialMarket"
+       Single<EeroBaseResponse> editBusinessName(@Path("id") String networkId, @Field(NetworkControlsScreenIdElements.label) String name);
+PUT    "2.2/networks/{id}/label?labelType=specialMarket"
+       Single<DataResponse<Network>> updateBusinessNameOrNetworkNickname(@Path("id") String networkId, @Field(NetworkControlsScreenIdElements.label) String name);
+GET    "2.2/networks/{id}/members"
+       Single<DataResponse<MembersResponse>> getMembers(@Path("id") String networkId);
+GET    "2.2/networks/{id}/network_scan"
+       Single<DataResponse<Map<String, Boolean>>> networkScan(@Path("id") String networkId);
+POST   "2.2/networks/{id}/node_setup"
+       Single<EeroBaseResponse> setNetworkToDefaultChannel(@Path("id") String networkId, @Field("default_channel_duration") int defaultChannelDurationSec);
+GET    "2.2/networks/{id}/notifications"
+       Single<DataResponse<NetworkNotifications>> getNetworkNotifications(@Path("id") String network);
+PUT    "2.2/networks/{id}/notifications"
+       Single<DataResponse<NetworkNotifications>> setNetworkNotifications(@Path("id") String network, @Body NetworkNotifications notifications);
+GET    "2.2/networks/{id}/ouicheck"
+       Single<DataResponse<OuiState>> checkOui(@Path("id") String networkId, @Query("serial") String serial, @Query("version") String version);
+GET    "2.2/networks/{id}/packaged_eeros"
+       Single<DataResponse<List<EeroSerial>>> packagedEeros(@Path("id") String networkId);
+PUT    "2.2/networks/{id}/passpoint/enabled"
+       Object updatePasspointEnabled(@Path("id") String str, @Body PasspointStatus passpointStatus, Continuation<? super EeroBaseResponse> continuation);
+GET    "2.2/networks/{id}/safe_filter_levels"
+       Object coGetNetworkFilterLevels(@Path("id") String str, @Query("safeFilterType") String str2, Continuation<? super DataResponse<FilterLevelResponse>> continuation);
+GET    "2.2/networks/{id}/safe_filter_levels"
+       Single<DataResponse<FilterLevelResponse>> getNetworkFilterLevels(@Path("id") String networkId, @Query("safeFilterType") String safeFilterType);
+GET    "2.2/networks/{id}/subnets_config"
+       Object coGetNetworkSubnetsConfig(@Path("id") String str, Continuation<? super DataResponse<List<SubnetConfig>>> continuation);
+PUT    "2.2/networks/{id}/subnets_config"
+       Single<DataResponse<SubnetConfig>> createOrEditNetworkSubnetConfig(@Path("id") String networkId, @Body SubnetConfig subnetConfig);
+GET    "2.2/networks/{id}/subnets_config"
+       Single<DataResponse<List<SubnetConfig>>> getNetworkSubnetsConfig(@Path("id") String networkId);
+PUT    "2.2/networks/{id}/subnets_config/dns_policies/content_filters"
+       Object coUpdateSubnetContentFilters(@Path("id") String str, @Body SubnetContentFiltersRequest subnetContentFiltersRequest, Continuation<? super DataResponse<List<SubnetContentFiltersResponse>>> continuation);
+PUT    "2.2/networks/{id}/subnets_config/dns_policies/content_filters"
+       Single<DataResponse<List<SubnetContentFiltersResponse>>> updateSubnetContentFilters(@Path("id") String networkId, @Body SubnetContentFiltersRequest request);
+GET    "2.2/networks/{id}/subnets_config/{subnet_id}/dns_policies/content_filters"
+       Object coGetSubnetContentFilters(@Path("id") String str, @Path("subnet_id") String str2, Continuation<? super DataResponse<SubnetContentFilters>> continuation);
+GET    "2.2/networks/{id}/subnets_config/{subnet_id}/dns_policies/content_filters"
+       Single<DataResponse<SubnetContentFilters>> getSubnetContentFilters(@Path("id") String networkId, @Path("subnet_id") String subnetId);
+DELETE "2.2/networks/{id}/subnets_config/{type}"
+       Single<EeroBaseResponse> deleteNetworkSubnetConfig(@Path("id") String networkId, @Path("type") String type);
+POST   "2.2/networks/{id}/thread"
+       Single<DataResponse<EeroThreadNetwork>> regenerateThreadCredentials(@Path("id") String networkId);
+PUT    "2.2/networks/{id}/thread"
+       Single<DataResponse<EeroThreadNetwork>> updateThreadNetwork(@Path("id") String networkId, @Body UpdateThreadNetworkRequest updateThreadNetworkRequest);
+DELETE "2.2/networks/{networkId}/accessories"
+       Object deregisterAccessories(@Path("networkId") String str, Continuation<? super Response<Unit>> continuation);
+GET    "2.2/networks/{networkId}/accessories/setup/status"
+       Object getAccessoriesStatus(@Path("networkId") String str, Continuation<? super DataResponse<List<AccessoryStatus>>> continuation);
+DELETE "2.2/networks/{networkId}/accessories/{serialNumber}"
+       Object deleteAccessory(@Path("networkId") String str, @Path("serialNumber") String str2, Continuation<? super Response<Unit>> continuation);
+GET    "2.2/networks/{networkId}/accessories/{serialNumber}"
+       Object getAccessoryStatus(@Path("networkId") String str, @Path("serialNumber") String str2, Continuation<? super DataResponse<Accessory>> continuation);
+DELETE "2.2/networks/{networkId}/admins/{userId}"
+       Single<EeroBaseResponse> removeAdmin(@Path("networkId") String networkId, @Path("userId") String adminUserId);
+GET    "2.2/networks/{networkId}/auto_discovered_eeros"
+       Object getAutoDiscoveredEeros(@Path("networkId") String str, Continuation<? super DataResponse<AutoDiscoveredEeroResponse>> continuation);
+PUT    "2.2/networks/{networkId}/auto_setup_mode"
+       Object setAutoSetupMode(@Path("networkId") String str, @Body SetAutoSetupMode setAutoSetupMode, Continuation<? super DataResponse<SetAutoSetupMode>> continuation);
+POST   "2.2/networks/{networkId}/backup_access_points"
+       Single<EeroBaseResponse> addBackupNetwork(@Path("networkId") String networkId, @Body AddBackupNetworkRequest addBackupNetworkRequest);
+GET    "2.2/networks/{networkId}/backup_access_points"
+       Single<DataResponse<List<BackupNetwork>>> getSavedBackupNetworks(@Path("networkId") String networkId);
+POST   "2.2/networks/{networkId}/backup_access_points/connectivity_check"
+       Single<EeroBaseResponse> startBackupConnectivityCheck(@Path("networkId") String networkId);
+POST   "2.2/networks/{networkId}/backup_access_points/rearrange"
+       Single<EeroBaseResponse> rearrangeBackupNetworks(@Path("networkId") String networkId, @Body RearrangeBackupNetworksRequest rearrangeBackupNetworksRequest);
+GET    "2.2/networks/{networkId}/backup_access_points/ssid_discovery"
+       Single<DataResponse<BackupNetworkDiscoveryStatusResponse>> getBackupNetworkDiscoveryStatus(@Path("networkId") String networkId);
+POST   "2.2/networks/{networkId}/backup_access_points/ssid_discovery"
+       Single<EeroBaseResponse> startBackupNetworkDiscovery(@Path("networkId") String networkId);
+DELETE "2.2/networks/{networkId}/backup_access_points/{backupNetworkId}"
+       Single<EeroBaseResponse> deleteBackupNetwork(@Path("networkId") String networkId, @Path("backupNetworkId") String backupNetworkId);
+PUT    "2.2/networks/{networkId}/backup_access_points/{backupNetworkId}"
+       Single<EeroBaseResponse> editBackupNetwork(@Path("networkId") String networkId, @Path("backupNetworkId") String backupNetworkId, @Body BackupNetwork backupNetwork);
+GET    "2.2/networks/{networkId}/backupinternet"
+       Single<DataResponse<BackupInternetEnabledResponse>> getBackupInternetEnabled(@Path("networkId") String networkId);
+PUT    "2.2/networks/{networkId}/backupinternet"
+       Single<DataResponse<BackupInternetEnabledResponse>> updateBackupInternetEnabled(@Path("networkId") String networkId, @Body BackupInternetEnabledRequest backupInternetToggleRequest);
+PUT    "2.2/networks/{networkId}/business_guest_network"
+       Object businessGuestNetwork(@Path("networkId") String str, @Body EnableCaptivePortalOnBoarding enableCaptivePortalOnBoarding, Continuation<? super Unit> continuation);
+PUT    "2.2/networks/{networkId}/captive_portal/configuration"
+       Single<EeroBaseResponse> editCaptivePortalConfiguration(@Path("networkId") String networkId, @Body CaptivePortalConfigurationRequest requestBody);
+PUT    "2.2/networks/{networkId}/captive_portal/configuration"
+       Single<EeroBaseResponse> editCaptivePortalVisitorInfo(@Path("networkId") String networkId, @Body CaptivePortalVisitorInfoRequest requestBody);
+GET    "2.2/networks/{networkId}/captive_portal/configurations"
+       Single<DataResponse<CaptivePortalConfigurations>> getCaptivePortalConfigurations(@Path("networkId") String networkId);
+PUT    "2.2/networks/{networkId}/captive_portal/subnet_id/GUEST"
+       Single<EeroBaseResponse> editCaptivePortalSubnet(@Path("networkId") String networkId, @Body CaptivePortalSubnetRequest captivePortalSubnetRequest);
+GET    "2.2/networks/{networkId}/cobranding"
+       Object getCobranding(@Path("networkId") String str, Continuation<? super DataResponse<CobrandingResponse>> continuation);
+GET    "2.2/networks/{networkId}/community"
+       Single<DataResponse<CommunityResponse>> getCommunity(@Path("networkId") String networkId);
+GET    "2.2/networks/{networkId}/data_usage/report_settings"
+       Single<DataResponse<DataUsageReportNotificationSettings>> getDataUsageReportSettings(@Path("networkId") String networkId);
+PUT    "2.2/networks/{networkId}/data_usage/report_settings"
+       Single<DataResponse<DataUsageReportNotificationSettings>> updateDataUsageReportSettings(@Path("networkId") String networkId, @Body DataUsageReportNotificationSettings dataUsageReportNotificationContent);
+GET    "2.2/networks/{networkId}/devices/{deviceMac}"
+       Single<DataResponse<NetworkDevice>> getNetworkDevice(@Path("networkId") String networkId, @Path("deviceMac") String deviceMac);
+POST   "2.2/networks/{networkId}/file/import/job"
+       Single<EeroBaseResponse> createImportFileJob(@Path("networkId") String networkId, @Body FileImportRequest requestBody);
+GET    "2.2/networks/{networkId}/file/import/upload_link"
+       Single<DataResponse<UploadUrlResponse>> getUploadUrl(@Path("networkId") String networkId, @Query("importJobType") ImportJobType importJobType, @Query("fileExtension") String fileExtension);
+POST   "2.2/networks/{networkId}/holding_state"
+       Single<EeroBaseResponse> putNetworkInHoldingState(@Path("networkId") String networkId);
+POST   "2.2/networks/{networkId}/invites"
+       Single<DataResponse<CreateInviteResponse>> createNetworkInvite(@Path("networkId") String networkId, @Body CreateInviteRequest createInviteRequest);
+GET    "2.2/networks/{networkId}/invites"
+       Single<DataResponse<List<Invite>>> getNetworkInvites(@Path("networkId") String networkId);
+POST   "2.2/networks/{networkId}/invites/cancel_pending_admin"
+       Single<EeroBaseResponse> cancelPendingAdminInvites(@Path("networkId") String networkId);
+POST   "2.2/networks/{networkId}/invites/response"
+       Single<DataResponse<Network>> acceptExternalInvite(@Path("networkId") String networkId, @Body ExternalInviteRequest externalInviteRequest);
+POST   "2.2/networks/{networkId}/invites/response"
+       Single<DataResponse<Network>> acceptPromotionInvite(@Path("networkId") String networkId, @Body PromotionInviteRequest promotionInviteRequest);
+POST   "2.2/networks/{networkId}/invites/response"
+       Single<EeroBaseResponse> declineExternalInvite(@Path("networkId") String networkId, @Body ExternalInviteRequest externalInviteRequest);
+POST   "2.2/networks/{networkId}/invites/response"
+       Single<EeroBaseResponse> declinePromotionInvite(@Path("networkId") String networkId, @Body PromotionInviteRequest promotionInviteRequest);
+DELETE "2.2/networks/{networkId}/invites/{inviteId}"
+       Single<EeroBaseResponse> cancelNetworkInvite(@Path("networkId") String networkId, @Path("inviteId") String inviteId);
+PUT    "2.2/networks/{networkId}/invites/{inviteId}"
+       Single<DataResponse<Invite>> updateInvite(@Path("networkId") String networkId, @Path("inviteId") String inviteId, @Body UpdateInviteRequest updateInviteRequest);
+GET    "2.2/networks/{networkId}/managed/subscription_referrals"
+       Object getReferralStatus(@Path("networkId") String str, Continuation<? super DataResponse<ReferralStatusResponse>> continuation);
+POST   "2.2/networks/{networkId}/member_promotion"
+       Single<DataResponse<PromoteAdminResponse>> promoteAdmin(@Path("networkId") String networkId, @Body PromoteAdminRequest promoteAdminRequest);
+PUT    "2.2/networks/{networkId}/mlo_mode"
+       Object updateMultiLinkOperation(@Path("networkId") String str, @Body MultiLinkOperationModeRequest multiLinkOperationModeRequest, Continuation<? super DataResponse<MultiLinkOperationModeRequest>> continuation);
+PUT    "2.2/networks/{networkId}/network_customer_type"
+       Single<EeroBaseResponse> updateNetworkType(@Path("networkId") String networkId, @Field(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_CUSTOMER_TYPE_KEY) String networkType);
+GET    "2.2/networks/{networkId}/organizations"
+       Single<DataResponse<OrganizationsResponse>> getOrganizations(@Path("networkId") String networkId);
+PUT    "2.2/networks/{networkId}/power_saving"
+       Single<DataResponse<PowerOptimizationResponse>> updatePowerSaving(@Path("networkId") String networkId, @Body PowerOptimizationRequest powerOptimizationRequest);
+POST   "2.2/networks/{networkId}/power_saving/schedules"
+       Object createPowerSavingSchedule(@Path("networkId") String str, @Body PowerSavingScheduleRequest powerSavingScheduleRequest, Continuation<? super DataResponse<PowerSavingSchedule>> continuation);
+GET    "2.2/networks/{networkId}/power_saving/schedules"
+       Object getPowerSavingSchedules(@Path("networkId") String str, Continuation<? super DataResponse<PowerSavingSchedulesResponse>> continuation);
+DELETE "2.2/networks/{networkId}/power_saving/schedules/{scheduleId}"
+       Object deletePowerSavingSchedule(@Path("networkId") String str, @Path("scheduleId") String str2, Continuation<? super DataResponse<Unit>> continuation);
+PUT    "2.2/networks/{networkId}/power_saving/schedules/{scheduleId}"
+       Object updatePowerSavingSchedule(@Path("networkId") String str, @Path("scheduleId") String str2, @Body PowerSavingScheduleRequest powerSavingScheduleRequest, Continuation<? super DataResponse<PowerSavingSchedule>> continuation);
+GET    "2.2/networks/{networkId}/promotions"
+       Object getNetworkPromotion(@Path("networkId") String str, Continuation<? super DataResponse<NetworkPromotionBody>> continuation);
+PUT    "2.2/networks/{networkId}/promotions"
+       Object putNetworkPromotion(@Path("networkId") String str, @Body NetworkPromotionBody networkPromotionBody, Continuation<? super Unit> continuation);
+GET    "2.2/networks/{networkId}/radio_settings"
+       Object getNetworkRadioSettings(@Path("networkId") String str, Continuation<? super DataResponse<List<EeroRadioSettings>>> continuation);
+PUT    "2.2/networks/{networkId}/settings"
+       Single<DataResponse<Network>> saveDhcpConfiguration(@Path("networkId") String networkId, @Body DhcpConfigurationRequest body);
+GET    "2.2/networks/{networkId}/sip_config_associations/{eeroId}"
+       Object getSipConfigAssociations(@Path("networkId") String str, @Path("eeroId") String str2, Continuation<? super DataResponse<List<SipConfigAssociation>>> continuation);
+GET    "2.2/networks/{networkId}/wpa3_per_band"
+       Object getWpa3PerBand(@Path("networkId") String str, Continuation<? super DataResponse<Wpa3PerBandResponse>> continuation);
+PUT    "2.2/networks/{networkId}/wpa3_per_band"
+       Object updateWpa3PerBand(@Path("networkId") String str, @Body Wpa3PerBandRequest wpa3PerBandRequest, Continuation<? super DataResponse<Wpa3PerBandResponse>> continuation);
+GET    "2.2/networks/{network_id}/notifications/has_unread"
+       Object getNotificationsHasUnread(@Path(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String str, Continuation<? super DataResponse<HasUnreadResponse>> continuation);
+POST   "2.2/networks/{network_id}/notifications/mark_read"
+       Object markNotificationsRead(@Path(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String str, Continuation<? super Unit> continuation);
+GET    "2.2/networks/{network_id}/notifications_history"
+       Object getNotifications(@Path(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String str, @Query("timestamp") String str2, @Query("cursor") String str3, @Query("limit") Integer num, Continuation<? super NotificationsHistoryResponse> continuation);
+GET    "2.2/networks/{network}/ac_compat"
+       Object getLegacyNetwork(@Path(HealthCheckResults.NETWORK) String str, Continuation<? super DataResponse<LegacyNetwork>> continuation);
+GET    "2.2/networks/{network}/ac_compat"
+       Single<DataResponse<LegacyNetwork>> getLegacyNetworkSingle(@Path(HealthCheckResults.NETWORK) String networkId);
+PUT    "2.2/networks/{network}/ac_compat"
+       Object updateLegacyNetwork(@Path(HealthCheckResults.NETWORK) String str, @Field("enabled") Boolean bool, Continuation<? super DataResponse<LegacyNetwork>> continuation);
+GET    "2.2/networks/{network}/channel_utilization"
+       Single<DataResponse<NetworkChannelUtilization>> getChannelUtilization(@Path(HealthCheckResults.NETWORK) String networkId, @Query("start") String start, @Query("end") String end, @Query("busy_threshold") Integer busyThreshold, @Query("eero_id") Integer eeroId, @Query("band") String band, @Query("granularity") Integer granularity, @Query("gap_data_placeholder") Integer gapDataPlaceholder);
+PUT    "2.2/networks/{network}/ddns/disable"
+       Single<DataResponse<DdnsStatusChangeResponse>> ddnsDisable(@Path(HealthCheckResults.NETWORK) String networkId);
+PUT    "2.2/networks/{network}/ddns/enable"
+       Single<DataResponse<DdnsStatusChangeResponse>> ddnsEnable(@Path(HealthCheckResults.NETWORK) String networkId);
+GET    "2.2/networks/{network}/dns_policies/advanced_content_filter"
+       Single<DataResponse<BlockedAndAllowedList>> getBlockAndAllowDomains(@Path(HealthCheckResults.NETWORK) String networkId);
+PUT    "2.2/networks/{network}/dns_policies/network/allowed"
+       Single<DataResponse<AllowDomainResponse>> allowDomainForNetwork(@Path(HealthCheckResults.NETWORK) String networkId, @Body AllowDomainForNetworkRequest request);
+PUT    "2.2/networks/{network}/dns_policies/network/allowed/cnames"
+       Single<EeroBaseResponse> allowCnamesForNetwork(@Path(HealthCheckResults.NETWORK) String networkId, @Body AllowCnamesForNetworkRequest request);
+PUT    "2.2/networks/{network}/dns_policies/network/blocked"
+       Single<EeroBaseResponse> blockDomainForNetwork(@Path(HealthCheckResults.NETWORK) String networkId, @Body BlockDomainForNetworkRequest request);
+PUT    "2.2/networks/{network}/dns_policies/profiles/allowed"
+       Single<DataResponse<AllowDomainResponse>> allowDomainForProfiles(@Path(HealthCheckResults.NETWORK) String networkId, @Body AllowDomainForProfilesRequest request);
+PUT    "2.2/networks/{network}/dns_policies/profiles/allowed/cnames"
+       Single<EeroBaseResponse> allowCnamesForProfiles(@Path(HealthCheckResults.NETWORK) String networkId, @Body AllowCnamesForProfilesRequest request);
+PUT    "2.2/networks/{network}/dns_policies/profiles/blocked"
+       Single<EeroBaseResponse> blockDomainForProfiles(@Path(HealthCheckResults.NETWORK) String networkId, @Body BlockDomainForProfilesRequest request);
+GET    "2.2/networks/{network}/dns_policies/profiles/{profile}/applications"
+       Single<DataResponse<BlockAppsResponse>> getBlockApps(@Path(HealthCheckResults.NETWORK) String networkId, @Path(ActivityEntryPoint.PROFILE) String profileId);
+PUT    "2.2/networks/{network}/dns_policies/profiles/{profile}/applications/blocked"
+       Single<EeroBaseResponse> updateBlockApps(@Path(HealthCheckResults.NETWORK) String networkId, @Path(ActivityEntryPoint.PROFILE) String profileId, @Body BlockAppsRequest blockAppsRequest);
+GET    "2.2/networks/{network}/managed"
+       Object coGetNetworkManaged(@Path(HealthCheckResults.NETWORK) String str, Continuation<? super DataResponse<Network>> continuation);
+GET    "2.2/networks/{network}/managed"
+       Single<DataResponse<Network>> getNetworkManaged(@Path(HealthCheckResults.NETWORK) String networkId);
+PUT    "2.2/networks/{network}/proxied_nodes"
+       Single<DataResponse<ProxiedNodes>> updateProxiedNodesNetworkStatus(@Path(HealthCheckResults.NETWORK) String networkId, @Body ProxiedNodesRequest proxiedNodesRequest);
+GET    "2.2/networks/{network}/simple_setup/vendors"
+       Single<DataResponse<List<SimpleSetupNetworkConfiguration>>> getSimpleSetupNetworkConfigurations(@Path(HealthCheckResults.NETWORK) String networkId);
+GET    "2.2/networks/{network}/simple_setup/vendors/{vendor}"
+       Single<DataResponse<SimpleSetupNetworkConfiguration>> getSimpleSetupNetworkConfiguration(@Path(HealthCheckResults.NETWORK) String networkId, @Path("vendor") String vendorId);
+PUT    "2.2/networks/{network}/simple_setup/vendors/{vendor}"
+       Single<DataResponse<SimpleSetupNetworkConfiguration>> updateSimpleSetupNetworkConfiguration(@Path(HealthCheckResults.NETWORK) String networkId, @Path("vendor") String vendorId, @Field("enabled") boolean enabled);
+DELETE "2.2/networks/{network}/temporary_flags/{flagName}"
+       Object deleteTemporaryFlags(@Path(HealthCheckResults.NETWORK) String str, @Path("flagName") String str2, Continuation<? super EeroBaseResponse> continuation);
+PUT    "2.2/networks/{network}/temporary_flags/{flagName}"
+       Object updateTemporaryFlags(@Path(HealthCheckResults.NETWORK) String str, @Path("flagName") String str2, @Field("value") boolean z, Continuation<? super EeroBaseResponse> continuation);
+GET    "2.2/organizations/self/networks/pro_managed"
+       Single<DataResponse<ManagedNetworksResponse>> getManagedNetworks();
+GET    "2.2/organizations/self/networks/pro_managed"
+       Object getManagedNetworks(@Query("network_name_filter") String str, Continuation<? super DataResponse<ManagedNetworksResponse>> continuation);
+POST   "2.2/subscription_referral/email"
+       Object subscriptionEmail(@Body SubscriptionEmailRequest subscriptionEmailRequest, Continuation<? super EeroBaseResponse> continuation);
+PUT    "2.2/subscription_referrals"
+       Object getSubscriptionReferralUrl(@Body SubscriptionReferralRequest subscriptionReferralRequest, Continuation<? super DataResponse<SubscriptionReferralResponse>> continuation);
+GET    "2.2/transfer/has_networks"
+       Single<DataResponse<NetworkTransferUserTarget>> checkTransferNetworkUserTarget(@Query("email") String email, @Query("phone") String phoneNumber);
+POST   <@Url dynamic>
+       Single<DataResponse<List<NetworkDevice>>> blockDevice(@Url String url, @Field("mac") String mac);
+POST   <@Url dynamic>
+       Single<DataResponse<BurstResponse>> burstReporters(@Url String url, @Body Object dummy);
+DELETE <@Url dynamic>
+       Single<EeroBaseResponse> cancelTransferNetworkInvite(@Url String url);
+PUT    <@Url dynamic>
+       Object coCreateDevice(@Url String str, @Body NetworkDevice networkDevice, Continuation<? super DataResponse<NetworkDevice>> continuation);
+POST   <@Url dynamic>
+       Object coCreateForward(@Url String str, @Body NetworkForward networkForward, Continuation<? super DataResponse<NetworkForward>> continuation);
+POST   <@Url dynamic>
+       Object coCreatePinhole(@Url String str, @Body NetRules.Pinhole pinhole, Continuation<? super DataResponse<Unit>> continuation);
+POST   <@Url dynamic>
+       Object coCreateReservation(@Url String str, @Body NetworkReservation networkReservation, Continuation<? super DataResponse<NetworkReservation>> continuation);
+POST   <@Url dynamic>
+       Object coCreateSchedule(@Url String str, @Body ScheduledPause scheduledPause, Continuation<? super DataResponse<ScheduledPause>> continuation);
+POST   <@Url dynamic>
+       Object coCreateWanLink(@Url String str, @Body CreateWanLinkRequest createWanLinkRequest, Continuation<? super CreateWanLinkResponse> continuation);
+DELETE <@Url dynamic>
+       Object coDeleteForward(@Url String str, Continuation<? super DataResponse<Unit>> continuation);
+DELETE <@Url dynamic>
+       Object coDeletePinhole(@Url String str, Continuation<? super DataResponse<Unit>> continuation);
+DELETE <@Url dynamic>
+       Object coDeleteReservation(@Url String str, @Query("delete_forwards") boolean z, Continuation<? super DataResponse<Unit>> continuation);
+DELETE <@Url dynamic>
+       Object coDeleteSchedule(@Url String str, Continuation<? super DataResponse<Unit>> continuation);
+DELETE <@Url dynamic>
+       Object coDeleteWanLink(@Url String str, Continuation<? super DataResponse<List<WanLink>>> continuation);
+GET    <@Url dynamic>
+       Object coDiscoverWanLinks(@Url String str, Continuation<? super DataResponse<DiscoveredWanLinksData>> continuation);
+PUT    <@Url dynamic>
+       Object coEnableMultiWan(@Url String str, @Body EnableMultiWanRequest enableMultiWanRequest, Continuation<? super DataResponse<MultiWanModeResponse>> continuation);
+GET    <@Url dynamic>
+       Object coGetBlockedDevices(@Url String str, Continuation<? super DataResponse<List<NetworkDevice>>> continuation);
+GET    <@Url dynamic>
+       Object coGetDevice(@Url String str, Continuation<? super DataResponse<NetworkDevice>> continuation);
+GET    <@Url dynamic>
+       Object coGetDevices(@Url String str, @Query("thread") boolean z, @Query("proxied_node") boolean z2, Continuation<? super DataResponse<List<NetworkDevice>>> continuation);
+GET    <@Url dynamic>
+       Object coGetForwards(@Url String str, Continuation<? super DataResponse<List<NetworkForward>>> continuation);
+GET    <@Url dynamic>
+       Object coGetMultiWanMode(@Url String str, Continuation<? super DataResponse<MultiWanModeResponse>> continuation);
+GET    <@Url dynamic>
+       Object coGetNetworkRules(@Url String str, Continuation<? super DataResponse<NetRules>> continuation);
+GET    <@Url dynamic>
+       Object coGetPinholes(@Url String str, Continuation<? super DataResponse<List<NetRules.Pinhole>>> continuation);
+GET    <@Url dynamic>
+       Object coGetProfile(@Url String str, Continuation<? super DataResponse<Profile>> continuation);
+GET    <@Url dynamic>
+       Object coGetReservations(@Url String str, Continuation<? super DataResponse<List<NetworkReservation>>> continuation);
+GET    <@Url dynamic>
+       Object coGetWanLimits(@Url String str, Continuation<? super DataResponse<WanLimits>> continuation);
+GET    <@Url dynamic>
+       Object coGetWanLink(@Url String str, Continuation<? super DataResponse<WanLinkDetail>> continuation);
+GET    <@Url dynamic>
+       Object coGetWanLinks(@Url String str, Continuation<? super DataResponse<List<WanLink>>> continuation);
+GET    <@Url dynamic>
+       Object coNetwork(@Url String str, Continuation<? super DataResponse<Network>> continuation);
+POST   <@Url dynamic>
+       Object coTransferNetwork(@Url String str, @Field("name") String str2, @Field(LinkNetworkScreenElements.email) String str3, @Field(LinkNetworkScreenElements.phoneNumber) String str4, Continuation<? super EeroBaseResponse> continuation);
+PUT    <@Url dynamic>
+       Object coUpdateForward(@Url String str, @Body NetworkForward networkForward, Continuation<? super DataResponse<NetworkForward>> continuation);
+PUT    <@Url dynamic>
+       Object coUpdatePinhole(@Url String str, @Body NetRules.Pinhole pinhole, Continuation<? super DataResponse<Unit>> continuation);
+POST   <@Url dynamic>
+       Object coUpdateProfileDnsPolicySettings(@Url String str, @FieldMap Map<String, Boolean> map, Continuation<? super DataResponse<DnsPolicySettings>> continuation);
+PUT    <@Url dynamic>
+       Object coUpdateReservation(@Url String str, @Body NetworkReservation networkReservation, Continuation<? super DataResponse<Unit>> continuation);
+PUT    <@Url dynamic>
+       Object coUpdateSchedule(@Url String str, @Body ScheduledPause scheduledPause, Continuation<? super DataResponse<ScheduledPause>> continuation);
+PUT    <@Url dynamic>
+       Object coUpdateWanLinks(@Url String str, @Body UpdateWanLinksRequest updateWanLinksRequest, Continuation<? super DataResponse<List<WanLink>>> continuation);
+PUT    <@Url dynamic>
+       Single<DataResponse<NetworkDevice>> createDevice(@Url String url, @Body NetworkDevice device);
+POST   <@Url dynamic>
+       Single<DataResponse<NetworkForward>> createForward(@Url String url, @Body NetworkForward networkForward);
+POST   <@Url dynamic>
+       Single<DataResponse<NetRules.Pinhole>> createPinhole(@Url String url, @Body NetRules.Pinhole pinhole);
+POST   <@Url dynamic>
+       Single<DataResponse<Profile>> createProfiles(@Url String url, @Body ProfileUpdateRequest profile);
+POST   <@Url dynamic>
+       Single<DataResponse<NetworkReservation>> createReservation(@Url String url, @Body NetworkReservation networkReservation);
+DELETE <@Url dynamic>
+       Single<EeroBaseResponse> deleteForward(@Url String url);
+DELETE <@Url dynamic>
+       Single<DataResponse<GuestNetwork>> deleteGuestNetworkPassword(@Url String url);
+DELETE <@Url dynamic>
+       Single<EeroBaseResponse> deleteNetwork(@Url String url, @Query("cancel_premium") boolean cancelPremium);
+DELETE <@Url dynamic>
+       Single<DataResponse<Network>> deletePassword(@Url String url);
+DELETE <@Url dynamic>
+       Single<EeroBaseResponse> deletePinhole(@Url String url);
+DELETE <@Url dynamic>
+       Single<EeroBaseResponse> deleteProfile(@Url String url);
+DELETE <@Url dynamic>
+       Single<EeroBaseResponse> deleteReservation(@Url String url, @Query("delete_forwards") boolean shouldDeleteForwards);
+PUT    <@Url dynamic>
+       Single<DataResponse<EeroThreadNetwork>> enableThreadNetwork(@Url String url, @Body EnableThreadNetworkRequest enableThreadNetworkRequest);
+GET    <@Url dynamic>
+       Single<DataResponse<List<NetworkDevice>>> getBlockedDevices(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<NetworkDevice>> getDevice(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<List<NetworkDevice>>> getDevices(@Url String url, @Query("thread") boolean includeThread, @Query("proxied_node") boolean includeProxiedNode);
+GET    <@Url dynamic>
+       Single<DataResponse<List<NetworkForward>>> getForwards(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<GuestNetwork>> getGuestNetwork(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<HealthCheckResults>> getHealthCheckResults(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<Network>> getNetwork(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<DnsPolicySettings>> getNetworkDnsPolicySettings(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<NetRules>> getNetworkRules(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<PermissionsResponse>> getPermissions(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<NetRules.Pinhole>> getPinhole(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<List<NetRules.Pinhole>>> getPinholes(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<Profile>> getProfile(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<DnsPolicySettings>> getProfileDnsPolicySettings(@Url String url);
+GET    <@Url dynamic>
+       Object getProfiles(@Url String str, Continuation<? super DataResponse<List<Profile>>> continuation);
+GET    <@Url dynamic>
+       Single<DataResponse<List<Profile>>> getProfilesRx(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<List<NetworkDevice>>> getProxiedNodeConnectedDevices(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<ProxiedNodeDevice>> getProxiedNodeDetails(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<List<NetworkReservation>>> getReservations(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<List<SpeedTest>>> getSpeedTests(@Url String url, @Query("limit") int limit, @Query("startTime") String start, @Query("endTime") String end);
+GET    <@Url dynamic>
+       Object getSupport(@Url String str, Continuation<? super DataResponse<SupportInfo>> continuation);
+GET    <@Url dynamic>
+       Single<DataResponse<SupportInfo>> getSupportRx(@Url String url);
+GET    <@Url dynamic>
+       Single<ResponseBody> getTermsOfUse(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<EeroThreadNetwork>> getThreadNetwork(@Url String url);
+GET    <@Url dynamic>
+       Single<DataResponse<NetworkTransferInvite>> getTransferNetworkInvite(@Url String url);
+POST   <@Url dynamic>
+       Single<Response<Void>> placementTestRequest(@Url String url, @Body PlacementRequest data);
+GET    <@Url dynamic>
+       Single<DataResponse<List<PlacementResult>>> placementTestResults(@Url String url, @Query("eeros") List<String> eeros);
+GET    <@Url dynamic>
+       Object pollDnsPerfTest(@Url String str, Continuation<? super DataResponse<DnsPerfTestResponse>> continuation);
+POST   <@Url dynamic>
+       Single<DataResponse<NetworkUpdates>> postNetworkUpdates(@Url String url, @Body Object dummy);
+POST   <@Url dynamic>
+       Single<DataResponse<HealthCheckRunStatus>> postRunHealthCheck(@Url String url, @Body HealthCheckSymptom symptom);
+POST   <@Url dynamic>
+       Single<EeroBaseResponse> reboot(@Url String url, @Body Object dummy);
+POST   <@Url dynamic>
+       Single<EeroBaseResponse> resendTransferNetwork(@Url String url);
+POST   <@Url dynamic>
+       Object runDnsPerfTest(@Url String str, @Body DnsPerfTestRequest dnsPerfTestRequest, Continuation<? super DataResponse<DnsPerfTestKickoffResponse>> continuation);
+POST   <@Url dynamic>
+       Single<EeroBaseResponse> startSpeedTest(@Url String url, @Body Object dummy);
+POST   <@Url dynamic>
+       Single<EeroBaseResponse> transferNetwork(@Url String url, @Field("name") String name, @Field(LinkNetworkScreenElements.email) String email, @Field(LinkNetworkScreenElements.phoneNumber) String phoneNumber);
+DELETE <@Url dynamic>
+       Single<DataResponse<List<NetworkDevice>>> unblockDevice(@Url String url);
+PUT    <@Url dynamic>
+       Single<DataResponse<Network>> updateACH(@Url String url, @Field(SettingsScreenIdElements.amazonConnectedHome) boolean ach);
+PUT    <@Url dynamic>
+       Single<DataResponse<NetworkDevice>> updateDevice(@Url String url, @Body NetworkDeviceRequest network);
+PUT    <@Url dynamic>
+       Single<DataResponse<NetworkForward>> updateForward(@Url String url, @Body NetworkForward networkForward);
+PUT    <@Url dynamic>
+       Single<DataResponse<GuestNetwork>> updateGuestNetwork(@Url String url, @Field("name") String name, @Field("enabled") boolean enabled);
+PUT    <@Url dynamic>
+       Single<DataResponse<GuestNetwork>> updateGuestNetworkPassword(@Url String url, @Field("password") String password);
+PUT    <@Url dynamic>
+       Single<DataResponse<Network>> updateName(@Url String url, @Field("name") String name);
+PUT    <@Url dynamic>
+       Single<DataResponse<Network>> updateNetwork(@Url String url, @Body Network network);
+POST   <@Url dynamic>
+       Single<DataResponse<DnsPolicySettings>> updateNetworkAdBlockSettings(@Url String url, @Body AdBlockSettingsRequest request);
+POST   <@Url dynamic>
+       Single<DataResponse<DnsPolicySettings>> updateNetworkDnsPolicySettings(@Url String url, @FieldMap Map<String, Boolean> body);
+PUT    <@Url dynamic>
+       Single<DataResponse<Network>> updateNetworkSettings(@Url String url, @Body Network network);
+PUT    <@Url dynamic>
+       Single<DataResponse<Network>> updatePassword(@Url String url, @Field("password") String password);
+PUT    <@Url dynamic>
+       Single<DataResponse<NetRules.Pinhole>> updatePinhole(@Url String url, @Body NetRules.Pinhole pinhole);
+POST   <@Url dynamic>
+       Single<Response<Void>> updatePreferredHour(@Url String url, @Body PreferredUpdateHour preferredUpdateHour);
+PUT    <@Url dynamic>
+       Single<DataResponse<Profile>> updateProfile(@Url String url, @Body ProfileUpdateRequest profile);
+POST   <@Url dynamic>
+       Single<DataResponse<Profile>> updateProfileAdBlockSettings(@Url String url, @Body AdBlockProfileSettingsRequest request);
+POST   <@Url dynamic>
+       Single<DataResponse<DnsPolicySettings>> updateProfileDnsPolicySettings(@Url String url, @FieldMap Map<String, Boolean> body);
+PUT    <@Url dynamic>
+       Single<DataResponse<ProxiedNodeDevice>> updateProxiedNodeDetails(@Url String url, @Body ProxiedNodeDetailsRequest proxiedNodeDetails);
+PUT    <@Url dynamic>
+       Single<DataResponse<NetworkReservation>> updateReservation(@Url String url, @Body NetworkReservation networkReservation);
+PUT    <@Url dynamic>
+       Single<DataResponse<Network>> updateSqm(@Url String url, @Query("sqm") boolean sqm);
+PUT    <@Url dynamic>
+       Single<Response<Void>> uploadFile(@Url String url, @Header("x-amz-server-side-encryption-aws-kms-key-id") String awsKeyId, @Header("Content-Type") String contentType, @Header("x-amz-server-side-encryption") String encryption, @Body RequestBody requestBody);
+
+### com\eero\android\core\api\partnerupsell\IPartnerUpsell.java
+PUT    "2.2/partners/upsells/authentication"
+       Object authenticate(@Body AuthenticateRequest authenticateRequest, Continuation<? super DataResponse<EeroBaseResponse>> continuation);
+GET    "2.2/partners/upsells/authentication_methods"
+       Object getAuthenticationMethod(Continuation<? super DataResponse<AuthenticationSession>> continuation);
+POST   "2.2/partners/upsells/authentication_methods"
+       Object postAuthenticationMethod(@Body InformAuthenticationMethodRequest informAuthenticationMethodRequest, Continuation<? super DataResponse<EeroBaseResponse>> continuation);
+GET    "2.2/partners/upsells/offers"
+       Object getOffers(@Query("opt_network_id") String str, Continuation<? super DataResponse<OffersResponse>> continuation);
+POST   "2.2/partners/upsells/orders"
+       Object createOrder(@Body CreateOrderRequest createOrderRequest, Continuation<? super DataResponse<EeroBaseResponse>> continuation);
+
+### com\eero\android\core\api\premium\IPremiumService.java
+GET    "/2.4/premium/plans/{id}"
+       Single<DataResponse<PlansResponse>> getPlans(@Path("id") String networkId);
+GET    "2.2/account/1password_status"
+       Object getCoOnePasswordStatus(Continuation<? super DataResponse<OnePasswordStatus>> continuation);
+GET    "2.2/account/1password_status"
+       Single<DataResponse<OnePasswordStatus>> getOnePasswordStatus();
+GET    "2.2/account/identity_protection"
+       Object getMalwareBytes(Continuation<? super DataResponse<MalwareBytesStatus>> continuation);
+POST   "2.2/account/identity_protection/scan"
+       Object postDigitalFootprintScan(@Body DigitalFootprintScanRequest digitalFootprintScanRequest, Continuation<? super DataResponse<DigitalFootprintScanResponse>> continuation);
+POST   "2.2/account/identity_protection/scan/email"
+       Object postDigitalFootprintEmail(@Body DigitalFootprintEmailRequest digitalFootprintEmailRequest, Continuation<? super DataResponse<EeroBaseResponse>> continuation);
+POST   "2.2/account/identity_protection/signup"
+       Object signUpMalwareBytes(@Body SignUpMalwareBytesRequest signUpMalwareBytesRequest, Continuation<? super DataResponse<MalwareBytesStatus>> continuation);
+POST   "2.2/account/identity_protection/verify_email"
+       Object postDigitalFootprintVerifyCode(@Body DigitalFootprintVerifyCodeRequest digitalFootprintVerifyCodeRequest, Continuation<? super DataResponse<DigitalFootprintScanResponse>> continuation);
+GET    "2.2/networks/{networkId}/identity_protection/countries"
+       Object getMalwareBytesSupportedCountries(@Path("networkId") String str, Continuation<? super DataResponse<SupportedCountriesResponse>> continuation);
+POST   "2.2/partners/encryptme"
+       Single<DataResponse<EeroBaseResponse>> createEncryptMeAccount(@Field("test") boolean useStageEnv);
+POST   "2.2/partners/guardian"
+       Single<DataResponse<GuardianCredentials>> getGuardianCredentails();
+GET    "2.2/partners/guardian/networks/{networkId}/availability"
+       Single<DataResponse<VpnSeatsAvailability>> getVpnSeatsAvailability(@Path("networkId") String networkId);
+POST   "2.2/partners/guardian/networks/{networkId}/pet"
+       Single<DataResponse<GuardianDevice>> getGuardianVpnPet(@Path("networkId") String networkId, @Body GuardianVpnPetRequest vpnPetRequest);
+GET    "2.2/partners/malwarebytes/coupon"
+       Single<DataResponse<PartnerCoupon>> getMalwarebytesCoupon(@Query("test") boolean useStageEnv);
+GET    "2.2/partners/onepassword/coupon"
+       Single<DataResponse<PartnerCoupon>> getOnePasswordCoupon(@Query("test") boolean useStageEnv);
+GET    "2.2/premium/customer"
+       Single<DataResponse<Customer>> getCustomer();
+POST   "2.2/premium/customer/plans"
+       Single<DataResponse<Customer>> createAutoSubscription(@Field("autotrial_tier") String autotrialTier);
+POST   "2.2/premium/in_app_payments/offers/{networkId}"
+       Object coEeroPlusOffers(@Path("networkId") String str, @Body EeroPlusOfferRequest eeroPlusOfferRequest, Continuation<? super DataResponse<EeroPlusOfferResponse>> continuation);
+POST   "2.2/premium/in_app_payments/offers/{networkId}"
+       Single<DataResponse<EeroPlusOfferResponse>> getEeroPlusOffers(@Path("networkId") String networkId, @Body EeroPlusOfferRequest eeroPlusOfferRequest);
+GET    "2.2/premium/in_app_payments/{networkId}"
+       Object coOptionsForGoogleBillingSystem(@Path("networkId") String str, @Query(DeepLinkScreen.SubscriptionReferral.PRODUCT_TYPE) String str2, Continuation<? super DataResponse<IapOptionsResponse>> continuation);
+GET    "2.2/premium/in_app_payments/{networkId}"
+       Single<DataResponse<IapOptionsResponse>> getOptionsForGoogleBillingSystem(@Path("networkId") String networkId, @Query(DeepLinkScreen.SubscriptionReferral.PRODUCT_TYPE) String productType);
+
+### com\eero\android\core\api\service\network\IInsightsStatsService.java
+GET    "2.2/networks/{id}/insights"
+       Single<DataResponse<InsightsSeriesOverview>> getInsightsSeriesForNetwork(@Path("id") String networkId, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{id}/insights/devices"
+       Single<DataResponse<InsightsForDevices>> getInsightsForDevices(@Path("id") String networkId, @Query("start") String start, @Query("end") String end, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{id}/insights/profiles"
+       Single<DataResponse<InsightsForProfiles>> getInsightsForProfiles(@Path("id") String networkId, @Query("start") String start, @Query("end") String end, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage"
+       Single<DataResponse<InsightsSeriesOverview>> getDataUsageForNetwork(@Path("networkId") String networkId, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/breakdown"
+       Single<DataResponse<DataUsageCombinedBreakdown>> getDataUsageCombinedBreakdown(@Path("networkId") String networkId, @Query("start") String start, @Query("end") String end, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/devices"
+       Single<DataResponse<DataUsageDevices>> getDataUsageForDevicesInProfile(@Path("networkId") String networkId, @Query("profile_id") String profileId, @Query("start") String start, @Query("end") String end, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/devices/{deviceMac}"
+       Single<DataResponse<DataUsageSeriesForDevice>> getDataUsageForDevice(@Path("networkId") String networkId, @Path("deviceMac") String deviceMac, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/eeros/summary"
+       Single<DataResponse<InsightsSeriesOverview>> getDataUsageSummaryForEeroDevice(@Path("networkId") String networkId, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/eeros/{eeroId}"
+       Single<DataResponse<DataUsageSeriesForEero>> getDataUsageForEero(@Path("networkId") String networkId, @Path("eeroId") String eeroId, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/profiles/{profileId}"
+       Single<DataResponse<DataUsageSeriesForProfile>> getDataUsageForProfile(@Path("networkId") String networkId, @Path("profileId") String profileId, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/unprofiled/devices"
+       Single<DataResponse<DataUsageDevices>> getDataUsageForUnprofiledDevices(@Path("networkId") String networkId, @Query("start") String start, @Query("end") String end, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{networkId}/data_usage/unprofiled/summary"
+       Single<DataResponse<InsightsSeriesOverview>> getDataUsageSummaryForUnprofiledDevice(@Path("networkId") String networkId, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("timezone") String timezone, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{network_id}/insights/devices/{device_mac}"
+       Single<DataResponse<InsightsSeriesForDevice>> getInsightsSeriesForDeviceByMac(@Path(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String networkId, @Path("device_mac") String deviceMac, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{network_id}/insights/profiles/{profile_id}"
+       Single<DataResponse<InsightsSeriesForProfile>> getInsightsSeriesForProfileById(@Path(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String networkId, @Path("profile_id") String profileId, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    "2.2/networks/{network_id}/insights/profiles/{profile_id}/devices"
+       Single<DataResponse<InsightsForDevices>> getInsightsForDevicesInProfile(@Path(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String networkId, @Path("profile_id") String profileId, @Query("start") String start, @Query("end") String end, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    <@Url dynamic>
+       Single<DataResponse<InsightsSeriesForDevice>> getInsightsSeriesForDevice(@Url String deviceUrl, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    <@Url dynamic>
+       Single<DataResponse<InsightsSeriesForProfile>> getInsightsSeriesForProfile(@Url String profileUrl, @Query("start") String start, @Query("end") String end, @Query(DeepLinkViewModelKt.QUERY_CADENCE) String cadence, @Query("insight_type") String insightType, @Header("Cache-Control") CacheControl cacheControl);
+GET    <@Url dynamic>
+       Single<DataResponse<List<SpeedTest>>> getSpeedTests(@Url String url, @Query("limit") int limit, @Query("startTime") String start, @Query("endTime") String end, @Header("Cache-Control") CacheControl cacheControl);
+
+### com\eero\android\core\api\user\IUserService.java
+POST   "/2.3/login"
+       Object papLogin(@Field("auth_token") String str, Continuation<? super DataResponse<PapLoginResponse>> continuation);
+DELETE "2.2/account"
+       Single<EeroBaseResponse> deleteUser();
+GET    "2.2/account"
+       Single<DataResponse<User>> getUser(@Query("fetch_address_data") Boolean fetchAddressData);
+POST   "2.2/account/amazon_login"
+       Single<DataResponse<User>> migrateToAmazonLogin(@Field("auth_token") String mapToken, @Field("directed_id") String directedId, @Field(MixpanelClientKt.MIXPANEL_SUPER_PROPERTY_NETWORK_ID) String networkId);
+PUT    "2.2/account/consents"
+       Single<DataResponse<User>> updateConsents(@Field("marketing_emails") boolean stayUpToDate);
+GET    "2.2/account/eero_support"
+       Single<DataResponse<SupportInfo>> getSupport();
+PUT    "2.2/account/email"
+       Single<EeroBaseResponse> updateUserEmail(@Field("email") String email);
+POST   "2.2/account/email/verify"
+       Single<DataResponse<User>> verifyUpdateEmail(@Field(DeepLinkScreen.RespondNetworkInvite.QUERY_INVITE_CODE) String code);
+PUT    "2.2/account/license_activation_consent"
+       Single<EeroBaseResponse> acceptLicenseConsent(@Body Map<String, Boolean> body);
+PUT    "2.2/account/name"
+       Single<DataResponse<User>> updateUserName(@Field("name") String name);
+PUT    "2.2/account/phone"
+       Single<EeroBaseResponse> updateUserPhone(@Field("phone") String phone);
+POST   "2.2/account/phone/verify"
+       Single<DataResponse<User>> verifyUpdatePhone(@Field(DeepLinkScreen.RespondNetworkInvite.QUERY_INVITE_CODE) String code);
+PUT    "2.2/account/push_settings"
+       Single<DataResponse<User>> updateUserPushSettings(@Body PushSettings pushSettings);
+POST   "2.2/account/pushdevices"
+       Single<EeroBaseResponse> createOrUpdatePushToken(@Body PostPushDevice postPushDevice);
+DELETE "2.2/account/pushdevices/{id}"
+       Single<EeroBaseResponse> deletePushDevice(@Path("id") String deviceId);
+POST   "2.2/account/trust"
+       Single<ResponseBody> addTrust(@Field("certificate") String certificatePem);
+GET    "2.2/account/trust"
+       Single<Response<ResponseBody>> getTrust();
+PUT    "2.2/account/trust"
+       Single<ResponseBody> updateTrust(@Field("certificate") String certificatePem, @Field("serial") String oldCertificateSerial);
+DELETE "2.2/account/trust/{serial}"
+       Single<ResponseBody> deleteTrust(@Path("serial") String certificateSerial);
+GET    "2.2/consents/account"
+       Single<DataResponse<List<OptInAgreement>>> getOptInAgreements(@Query("country") String country);
+GET    "2.2/countries/sms"
+       Single<DataResponse<List<CountryCode>>> getCountryCodes();
+GET    "2.2/data-controller/info"
+       Object getDataControllerInfo(Continuation<? super DataResponse<DataControllerInfo>> continuation);
+GET    "2.2/incoming_member_promotions"
+       Single<DataResponse<MemberPromotionResponse>> getMemberPromotions();
+POST   "2.2/login"
+       Single<DataResponse<Token>> login(@Field("login") String login);
+POST   "2.2/login/amazon"
+       Single<DataResponse<Token>> amazonLogin(@Field("auth_token") String authToken, @Field("create_account") boolean createAccount);
+POST   "2.2/login/refresh"
+       Single<DataResponse<User>> loginRefresh(@Body Object dummy);
+POST   "2.2/login/resend"
+       Single<EeroBaseResponse> loginResend(@Body Object dummy);
+GET    "2.2/login/temporary"
+       Object coTemporaryExternalToken(@Query("client_type") String str, @Query("target_page") String str2, Continuation<? super DataResponse<TemporaryExternalToken>> continuation);
+GET    "2.2/login/temporary"
+       Single<DataResponse<TemporaryExternalToken>> temporaryExternalToken(@Query("application") String application);
+POST   "2.2/login/verify"
+       Single<DataResponse<User>> loginVerify(@Field(DeepLinkScreen.RespondNetworkInvite.QUERY_INVITE_CODE) String code);
+POST   "2.2/logout"
+       Single<EeroBaseResponse> logout(@Field("Cookie") String token);
+POST   "2.2/organizations/self/payment_account"
+       Object createPaymentAccount(Continuation<? super DataResponse<PaymentAccountOnboardingResponse>> continuation);
+GET    "2.2/organizations/self/payment_account/management_url"
+       Object getPaymentAccountManagementUrl(Continuation<? super DataResponse<PaymentAccountManagementResponse>> continuation);
+POST   "2.2/register"
+       Single<DataResponse<Token>> createUser(@Field("name") String name, @Field("email") String email, @Field("phone") String phoneNumber, @Field("send_verification") boolean sendVerification);
+PUT    "2.2/register"
+       Single<EeroBaseResponse> updateUser(@Field("name") String name, @Field("email") String email, @Field("phone") String phoneNumber);
+POST   "2.2/register/email/resend"
+       Single<EeroBaseResponse> resendEmailVerify(@Body Object dummy);
+POST   "2.2/register/phone/resend"
+       Single<EeroBaseResponse> resendPhoneVerify(@Body Object dummy);
+POST   "2.2/register/verify"
+       Single<DataResponse<User>> registerVerify(@Body JsonObject registerVerifyBody);
+
+### com\eero\android\core\api\util\IUtilService.java
+POST   "2.2/util/generatepassword"
+       Single<DataResponse<String>> generatePassword(@Body Object obj);
+
+### com\eero\android\setup\feature\streamlined\gatewayv2\selectcommunity\data\ICommunitiesService.java
+GET    "2.2/organizations/self/subsets"
+       Object getOrganizationSubsets(@Query("token") String str, @Query("limit") int i, @Query("search") String str2, Continuation<? super OrganizationSubsetsResponse> continuation);
+PUT    "2.2/organizations/self/subsets/{subsetId}/associate"
+       Object associateEeroToSubset(@Path("subsetId") String str, @Body AssociateEeroToSubsetRequest associateEeroToSubsetRequest, Continuation<? super DataResponse<OrganizationSubset>> continuation);
+GET    <@Url dynamic>
+       Object getEeroCommunity(@Url String str, Continuation<? super DataResponse<EeroCommunityAssociation>> continuation);
+
+### com\eero\data\network\api\eero\IEeroDeviceApi.java
+GET    <@Url dynamic>
+       Object getEero(@Url String str, Continuation<? super DataResponse<NewEero>> continuation);
+PUT    <@Url dynamic>
+       Object updateEeroLocation(@Url String str, @Field("location") String str2, Continuation<? super DataResponse<NewEero>> continuation);
+
+### com\eero\data\network\api\service\release\IReleaseNotesService.java
+GET    <@Url dynamic>
+       Single<ReleaseNotesManifest> getReleaseNotesFromUrl(@Url String url);
+
+### com\eero\feature\cellularusage\data\CellularUsageService.java
+GET    "2.2/networks/{networkId}/cellular_backup_events"
+       Object getBackupEvents(@Path("networkId") String str, Continuation<? super DataResponse<BackupEventsResponse>> continuation);
+GET    "2.2/networks/{networkId}/cellular_backup_usage"
+       Object getBackupUsage(@Path("networkId") String str, Continuation<? super DataResponse<BackupUsageResponse>> continuation);
+
+### com\guardianconnect\api\IApiCalls.java
+GET    "/api/v1.1/servers/timezones-for-regions"
+       Call<ResponseBody> getListOfSupportedTimeZones();
+POST   "/api/v1.2/partners/subscriber/device-reference"
+       Call<ResponseBody> getConnectDeviceReference(@Body Map<String, Object> request);
+POST   "/api/v1.2/partners/subscriber/device/delete"
+       Call<ResponseBody> deleteConnectDevice(@Body Map<String, Object> request);
+POST   "/api/v1.2/partners/subscriber/devices/list"
+       Call<ResponseBody> allConnectDevices(@Body Map<String, Object> request);
+POST   "/api/v1.2/partners/subscriber/logout"
+       Call<ResponseBody> logoutConnectSubscriber(@Body Map<String, Object> logoutConnectSubscriberRequest);
+POST   "/api/v1.2/subscriber-credential/create"
+       Call<ResponseBody> getSubscriberCredential(@Body Map<String, Object> request);
+POST   "/api/v1.3/device"
+       Call<NewVPNDeviceResponse> createNewVPNDevice(@Body NewVPNDevice newVPNDevice);
+POST   "/api/v1.3/device/{deviceid}/invalidate-credentials"
+       Call<ResponseBody> invalidateVPNCredentials(@Path("deviceid") String deviceid, @Body Map<String, Object> requestData);
+POST   "/api/v1.3/partners/subscribers/new"
+       Call<ResponseBody> createNewGRDConnectSubscriber(@Body Map<String, Object> request);
+GET    "/api/v1.3/servers/all-server-regions/{precision}"
+       Call<ResponseBody> requestAllRegionsWithPrecision(@Path("precision") String precision);
+POST   "/api/v1.3/servers/hostnames-for-region"
+       Call<ResponseBody> requestListOfServersForRegionWithRegionPrecision(@Body Map<String, Object> requestData);
+GET    "/vpnsrv/api/server-status"
+       Call<ResponseBody> getServerStatus();

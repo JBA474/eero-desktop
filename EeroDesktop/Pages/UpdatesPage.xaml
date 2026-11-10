@@ -1,0 +1,32 @@
+<local:PageBase x:Class="EeroDesktop.Pages.UpdatesPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Software Updates" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="eero installs updates automatically during your preferred hour. You can also update right away."
+                       Style="{StaticResource PageSubtitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <ItemsControl x:Name="Facts" ItemTemplate="{StaticResource FactTemplate}" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="UpdateNowButton" Content="Update Now" Style="{StaticResource PrimaryButton}" Click="UpdateNow_Click"/>
+                        <Button Content="Set Preferred Update Hour…" Click="PreferredHour_Click"/>
+                        <Button Content="Raw Update Status" Click="Raw_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="Firmware by eero" Style="{StaticResource SectionTitle}"/>
+        </StackPanel>
+        <DataGrid x:Name="Grid">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="180"/>
+                <DataGridTextColumn Header="Model" Binding="{Binding Model}" Width="150"/>
+                <DataGridTextColumn Header="Firmware" Binding="{Binding Firmware}" Width="120"/>
+                <DataGridTextColumn Header="Update Available" Binding="{Binding UpdateAvailable}" Width="120"/>
+                <DataGridTextColumn Header="Update State" Binding="{Binding State}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</local:PageBase>

@@ -1,0 +1,104 @@
+<local:PageBase x:Class="EeroDesktop.Pages.AdvancedPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages">
+    <local:PageBase.Resources>
+        <!-- One switchable feature: checkbox, name, explanation, and a note (eero Plus / restarts eeros). -->
+        <DataTemplate x:Key="ToggleTemplate">
+            <DockPanel Margin="0,5" IsEnabled="{Binding IsAvailable}">
+                <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsOn, Mode=OneWay}" Tag="{Binding}" Click="Toggle_Click"
+                          Width="24" VerticalAlignment="Top" Margin="0,2,0,0"
+                          AutomationProperties.Name="{Binding Label}" AutomationProperties.AutomationId="{Binding AutomationId}"/>
+                <StackPanel>
+                    <TextBlock Text="{Binding Label}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Help}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding Note}" Foreground="{DynamicResource SystemFillColorCautionBrush}" TextWrapping="Wrap" FontSize="12">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </DockPanel>
+        </DataTemplate>
+    </local:PageBase.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+            <TextBlock Text="Advanced Settings" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Each change is sent on its own and only when the value actually changes. Settings that can make eero restart your eeros ask first."/>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Ad Blocking" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock x:Name="AdBlockStatus" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <TextBlock Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,8"
+                               Text="Free option: point the whole network at a public DNS service that filters ads and trackers: AdGuard DNS or Control D. No eero Plus needed. A few sites may break; switch back any time. The DNS benchmark shows which one is faster from here."/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="AdGuardOnButton" Content="Block Ads with AdGuard DNS" Style="{StaticResource PrimaryButton}" Click="AdGuardOn_Click"/>
+                        <Button x:Name="ControlDOnButton" Content="Block Ads with Control D" Click="ControlDOn_Click"/>
+                        <Button x:Name="AdGuardOffButton" Content="Stop Blocking Ads" Click="AdGuardOff_Click"/>
+                    </StackPanel>
+                    <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource SystemFillColorCautionBrush}" TextWrapping="Wrap" FontSize="12"
+                               Text="This is a DNS change: eero restarts every eero a few minutes later, so Wi-Fi and internet drop briefly."/>
+                    <ItemsControl x:Name="AdBlockToggles" ItemTemplate="{StaticResource ToggleTemplate}" Margin="0,12,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Network Features" Style="{StaticResource SectionTitle}"/>
+                    <ItemsControl x:Name="Toggles" ItemTemplate="{StaticResource ToggleTemplate}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="DNS" Style="{StaticResource SectionTitle}"/>
+                    <ItemsControl x:Name="DnsFacts" ItemTemplate="{StaticResource FactTemplate}" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Use Custom DNS Servers…" Click="CustomDns_Click"/>
+                        <Button Content="Use Automatic (ISP) DNS" Click="AutoDns_Click"/>
+                        <Button Content="Benchmark DNS Servers…" Click="Benchmark_Click" ToolTip="Test which DNS provider answers fastest from here, then switch to it (uses dnspyre)."/>
+                    </StackPanel>
+                    <ItemsControl x:Name="DnsToggles" ItemTemplate="{StaticResource ToggleTemplate}" Margin="0,10,0,0"/>
+                    <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource SystemFillColorCautionBrush}" TextWrapping="Wrap" FontSize="12"
+                               Text="Any DNS change makes eero restart every eero a few minutes later, so Wi-Fi and internet drop for everyone briefly."/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Remote Access &amp; Backup" Style="{StaticResource SectionTitle}"/>
+                    <ItemsControl x:Name="AccessToggles" ItemTemplate="{StaticResource ToggleTemplate}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="DHCP &amp; Addressing" Style="{StaticResource SectionTitle}"/>
+                    <ItemsControl x:Name="DhcpFacts" ItemTemplate="{StaticResource FactTemplate}"/>
+                    <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"
+                               Text="DHCP and NAT mode changes can take the network offline, so they aren't offered here. If you need one, use the API console and send only the fields to change (PUT resources.settings)."/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="eero Plus Security &amp; Filters" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock x:Name="PlusNote" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <ItemsControl x:Name="Policies" ItemTemplate="{StaticResource ToggleTemplate}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Blocked &amp; Allowed Sites" Click="BlockAllow_Click"/>
+                        <Button Content="Block a Site…" Click="BlockSite_Click"/>
+                        <Button Content="Allow a Site…" Click="AllowSite_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</local:PageBase>

@@ -1,0 +1,73 @@
+<local:PageBase x:Class="EeroDesktop.Pages.WifiPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages"
+                xmlns:app="clr-namespace:EeroDesktop">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="720" HorizontalAlignment="Left">
+            <TextBlock Text="Wi-Fi &amp; Guest" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Your main Wi-Fi name and password, and the separate guest network."
+                       Style="{StaticResource PageSubtitle}"/>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Main Wi-Fi" Style="{StaticResource SectionTitle}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Network Name" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                        <TextBox x:Name="NameBox" Grid.Column="1"/>
+                        <Button Grid.Column="2" Content="Save Name" Margin="8,0,0,0" Click="SaveName_Click"/>
+
+                        <TextBlock Grid.Row="2" Text="Password" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                        <app:SecretBox x:Name="PasswordBox" Grid.Row="2" Grid.Column="1"/>
+                        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0">
+                            <Button Content="Copy" Click="CopyPassword_Click"/>
+                            <Button Content="Generate" Click="Generate_Click"/>
+                            <Button Content="Save Password" Margin="0" Click="SavePassword_Click"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               Text="Changing the name or password disconnects every Wi-Fi device until it rejoins with the new details."/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Guest Network" Style="{StaticResource SectionTitle}"/>
+                    <CheckBox x:Name="GuestEnabled" Content="Guest Network On" Margin="0,0,0,10"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Guest Network Name" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                        <TextBox x:Name="GuestNameBox" Grid.Column="1"/>
+                        <Button Grid.Column="2" Content="Save" Margin="8,0,0,0" Style="{StaticResource PrimaryButton}" Click="SaveGuest_Click"/>
+
+                        <TextBlock Grid.Row="2" Text="Guest Password" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                        <app:SecretBox x:Name="GuestPasswordBox" Grid.Row="2" Grid.Column="1"/>
+                        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0">
+                            <Button Content="Save Password" Click="SaveGuestPassword_Click"/>
+                            <Button Content="Remove Password" Margin="0" Click="RemoveGuestPassword_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</local:PageBase>

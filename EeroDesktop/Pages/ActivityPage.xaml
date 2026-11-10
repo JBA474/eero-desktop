@@ -1,0 +1,54 @@
+<local:PageBase x:Class="EeroDesktop.Pages.ActivityPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Activity" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Speed test history, data usage, and network notifications." Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <DockPanel Grid.Row="1">
+            <TextBlock Text="Speed Tests" Style="{StaticResource SectionTitle}" DockPanel.Dock="Left" Margin="0,4,16,8"/>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Run Speed Test" Style="{StaticResource PrimaryButton}" Click="RunSpeedTest_Click"/>
+                <TextBlock x:Name="SpeedSummary" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+        </DockPanel>
+        <DataGrid x:Name="SpeedGrid" Grid.Row="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="200"/>
+                <DataGridTextColumn Header="Download (Mbps)" Binding="{Binding Down}" Width="140"/>
+                <DataGridTextColumn Header="Upload (Mbps)" Binding="{Binding Up}" Width="140"/>
+                <DataGridTextColumn Header="" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DockPanel Grid.Row="3" Margin="0,16,0,0">
+            <TextBlock Text="Usage &amp; Notifications" Style="{StaticResource SectionTitle}" DockPanel.Dock="Left" Margin="0,4,16,8"/>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <ComboBox x:Name="RangeCombo" Width="140" SelectedIndex="0" Margin="0,0,8,0">
+                    <ComboBoxItem Content="Last 24 Hours"/>
+                    <ComboBoxItem Content="Last 7 Days"/>
+                    <ComboBoxItem Content="Last 30 Days"/>
+                </ComboBox>
+                <Button Content="Data Usage" Click="Usage_Click"/>
+                <Button Content="Usage by Device" Click="UsageDevices_Click"/>
+                <Button Content="Notifications" Click="Notifications_Click"/>
+            </StackPanel>
+        </DockPanel>
+        <DataGrid x:Name="DetailGrid" Grid.Row="4">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Item" Binding="{Binding Key}" Width="320"/>
+                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</local:PageBase>

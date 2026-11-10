@@ -1,0 +1,73 @@
+<local:PageBase x:Class="EeroDesktop.Pages.PortsPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="0.6*"/>
+        </Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Reservations &amp; Port Forwarding" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Give devices fixed IP addresses and open ports to them from the internet."
+                       Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <DockPanel Grid.Row="1">
+            <TextBlock Text="IP Reservations" Style="{StaticResource SectionTitle}" DockPanel.Dock="Left" Margin="0,4,16,8"/>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Add" Click="AddReservation_Click"/>
+                <Button Content="Edit" Click="EditReservation_Click"/>
+                <Button Content="Delete" Style="{StaticResource DangerButton}" Click="DeleteReservation_Click"/>
+            </StackPanel>
+        </DockPanel>
+        <DataGrid x:Name="ReservationGrid" Grid.Row="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="IP Address" Binding="{Binding Ip}" Width="140"/>
+                <DataGridTextColumn Header="MAC" Binding="{Binding Mac}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DockPanel Grid.Row="3" Margin="0,16,0,0">
+            <TextBlock Text="Port Forwards" Style="{StaticResource SectionTitle}" DockPanel.Dock="Left" Margin="0,4,16,8"/>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Add" Click="AddForward_Click"/>
+                <Button Content="Edit" Click="EditForward_Click"/>
+                <Button Content="Enable / Disable" Click="ToggleForward_Click"/>
+                <Button Content="Delete" Style="{StaticResource DangerButton}" Click="DeleteForward_Click"/>
+            </StackPanel>
+        </DockPanel>
+        <DataGrid x:Name="ForwardGrid" Grid.Row="4">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="To IP" Binding="{Binding Ip}" Width="130"/>
+                <DataGridTextColumn Header="External Port" Binding="{Binding GatewayPort}" Width="110"/>
+                <DataGridTextColumn Header="Internal Port" Binding="{Binding ClientPort}" Width="110"/>
+                <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" Width="80"/>
+                <DataGridTextColumn Header="Enabled" Binding="{Binding Enabled}" Width="70"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DockPanel Grid.Row="5" Margin="0,16,0,0">
+            <TextBlock Text="IPv6 Pinholes" Style="{StaticResource SectionTitle}" DockPanel.Dock="Left" Margin="0,4,16,8"/>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Delete" Style="{StaticResource DangerButton}" Click="DeletePinhole_Click"/>
+                <Button Content="Raw Firewall Rules" Click="Rules_Click"/>
+            </StackPanel>
+        </DockPanel>
+        <DataGrid x:Name="PinholeGrid" Grid.Row="6">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Device" Binding="{Binding Device}" Width="*"/>
+                <DataGridTextColumn Header="Service" Binding="{Binding Service}" Width="Auto" MinWidth="120"/>
+                <DataGridTextColumn Header="Port" Binding="{Binding Port}" Width="110"/>
+                <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</local:PageBase>

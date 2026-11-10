@@ -1,0 +1,6 @@
+﻿<Application x:Class="EeroDesktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <!-- Resources are added in App() after ThemeMode is set, so app styles can build on the Fluent theme. -->
+</Application>

@@ -1,0 +1,78 @@
+<Window x:Class="EeroDesktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="eero Desktop" Icon="/Assets/AppIcon.ico" Width="1200" Height="780" MinWidth="900" MinHeight="560"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <!-- Status bar -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource LayerFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="12,5">
+            <TextBlock x:Name="StatusText" Text="Ready" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
+        </Border>
+
+        <!-- Sidebar -->
+        <Border DockPanel.Dock="Left" Width="220" Background="{DynamicResource LayerFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="18,18,18,12">
+                    <TextBlock Text="eero Desktop" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                    <TextBlock x:Name="AccountText" FontSize="11" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+                <ListBox x:Name="Nav" Background="Transparent" BorderThickness="0" Margin="6,0"
+                         SelectionChanged="Nav_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4" Margin="0,1" Padding="14,8">
+                                            <Grid>
+                                                <Border x:Name="Indicator" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left"
+                                                        Margin="-10,0,0,0" Background="{DynamicResource AccentFillColorDefaultBrush}" Visibility="Collapsed"/>
+                                                <ContentPresenter/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                                <Setter TargetName="Indicator" Property="Visibility" Value="Visible"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="20,10">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="UndoButton" Content="Undo Last Change" Click="Undo_Click" Visibility="Collapsed"
+                            AutomationProperties.AutomationId="UndoButton"/>
+                    <Button Content="Refresh" Click="Refresh_Click"/>
+                    <Button Content="Sign Out" Click="SignOut_Click" Margin="0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Network" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0"/>
+                    <ComboBox x:Name="NetworkCombo" MinWidth="240" SelectionChanged="NetworkCombo_SelectionChanged"/>
+                    <TextBlock x:Name="HealthText" VerticalAlignment="Center" Margin="14,0,0,0" FontWeight="SemiBold"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Page host -->
+        <ContentControl x:Name="PageHost" Margin="24,18,24,8"/>
+    </DockPanel>
+</Window>

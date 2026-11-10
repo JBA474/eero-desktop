@@ -1,0 +1,38 @@
+<local:PageBase x:Class="EeroDesktop.Pages.EerosPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="eeros" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="The eero units that make up this network. Select one to restart it, rename its location, or change its status light."
+                       Style="{StaticResource PageSubtitle}"/>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Restart" Style="{StaticResource DangerButton}" Click="Restart_Click"/>
+                <Button Content="Rename Location" Click="Rename_Click"/>
+                <Button Content="Status Light On/Off" Click="Led_Click"/>
+                <Button Content="Light Brightness" Click="Brightness_Click"/>
+                <Button x:Name="NightlightButton" Content="Nightlight" Click="Nightlight_Click" Visibility="Collapsed"
+                        ToolTip="Night light settings (eero Beacon)"/>
+                <Button Content="Ports" Click="Ports_Click"/>
+                <Button Content="Firmware History" Click="History_Click"/>
+                <Button Content="Details" Click="Details_Click"/>
+            </StackPanel>
+        </StackPanel>
+        <DataGrid x:Name="Grid" MouseDoubleClick="Details_Click">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="1.3*" MinWidth="96"/>
+                <DataGridTemplateColumn Header="Status" CellTemplate="{StaticResource StatusCell}" SortMemberPath="Status" Width="0.7*" MinWidth="80"/>
+                <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="0.8*" MinWidth="64"/>
+                <DataGridTextColumn Header="Model" Binding="{Binding Model}" Width="1.5*" MinWidth="110"/>
+                <DataGridTextColumn Header="Connection" Binding="{Binding Connection}" Width="1.6*" MinWidth="110"/>
+                <DataGridTextColumn Header="IP Address" Binding="{Binding Ip}" Width="1.1*" MinWidth="96"/>
+                <DataGridTextColumn Header="Clients" Binding="{Binding Clients}" Width="0.6*" MinWidth="60"/>
+                <DataGridTextColumn Header="Firmware" Binding="{Binding Firmware}" Width="0.9*" MinWidth="76"/>
+                <DataGridTextColumn Header="Light" Binding="{Binding Light}" Width="0.8*" MinWidth="64"/>
+                <DataGridTextColumn Header="Serial" Binding="{Binding Serial}" Width="1.3*" MinWidth="92"/>
+                <DataGridTextColumn Header="Last Restart" Binding="{Binding LastReboot}" Width="1.2*" MinWidth="90"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</local:PageBase>

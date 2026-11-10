@@ -1,0 +1,38 @@
+<local:PageBase x:Class="EeroDesktop.Pages.DevicesPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Devices" Style="{StaticResource PageTitle}"/>
+            <TextBlock x:Name="CountText" Style="{StaticResource PageSubtitle}"/>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <Button Content="Rename" Click="Rename_Click"/>
+                <Button Content="Pause / Resume" Click="Pause_Click"/>
+                <Button Content="Block / Unblock" Style="{StaticResource DangerButton}" Click="Block_Click"/>
+                <Button Content="Assign Profile" Click="Profile_Click"/>
+                <Button Content="Reserve IP" Click="Reserve_Click"/>
+                <Button Content="Details" Click="Details_Click"/>
+            </StackPanel>
+            <StackPanel Style="{StaticResource Toolbar}">
+                <TextBlock Text="Search" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                <TextBox x:Name="SearchBox" Width="260" TextChanged="Filter_Changed"/>
+                <CheckBox x:Name="OnlineOnly" Content="Online Only" Margin="16,0,0,0" IsChecked="True" Click="Filter_Changed"/>
+            </StackPanel>
+        </StackPanel>
+        <DataGrid x:Name="Grid" MouseDoubleClick="Details_Click">
+            <DataGrid.Columns>
+                <!-- Proportional widths so every column fits the window; MinWidth keeps text readable (the grid scrolls sideways below that). -->
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="2*" MinWidth="140"/>
+                <DataGridTemplateColumn Header="Status" CellTemplate="{StaticResource StatusCell}" SortMemberPath="Status" Width="0.8*" MinWidth="84"/>
+                <DataGridTextColumn Header="IP Address" Binding="{Binding Ip}" Width="1.1*" MinWidth="96"/>
+                <DataGridTextColumn Header="MAC" Binding="{Binding Mac}" Width="1.3*" MinWidth="120"/>
+                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}" Width="1.2*" MinWidth="90"/>
+                <DataGridTextColumn Header="Connection" Binding="{Binding Connection}" Width="1.2*" MinWidth="90"/>
+                <DataGridTextColumn Header="Connected To" Binding="{Binding Source}" Width="1.1*" MinWidth="90"/>
+                <DataGridTextColumn Header="Profile" Binding="{Binding Profile}" Width="0.9*" MinWidth="70"/>
+                <DataGridTextColumn Header="Last Active" Binding="{Binding LastActive}" Width="1*" MinWidth="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</local:PageBase>

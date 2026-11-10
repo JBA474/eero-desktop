@@ -1,0 +1,36 @@
+<Window x:Class="EeroDesktop.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="eero Desktop — Sign In" Icon="/Assets/AppIcon.ico" Width="440" SizeToContent="Height"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+       >
+    <Border Style="{StaticResource Card}" Margin="20">
+        <StackPanel>
+            <TextBlock Text="Sign In to eero" Style="{StaticResource PageTitle}"/>
+            <TextBlock x:Name="Intro" Style="{StaticResource PageSubtitle}"
+                       Text="Enter the email address or phone number on your eero account. eero will send you a verification code."/>
+
+            <StackPanel x:Name="StepLogin">
+                <TextBlock Text="Email or Phone (+1 Format for Phones)" Margin="0,0,0,4"/>
+                <TextBox x:Name="LoginBox"/>
+                <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           Text="Accounts that sign in with Amazon can't sign in here. Ask the network owner to invite another email address as a network admin in the eero app, then sign in with that email."/>
+                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                    <Button x:Name="SendButton" Content="Send Code" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Send_Click"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel x:Name="StepVerify" Visibility="Collapsed">
+                <TextBlock Text="Verification Code" Margin="0,0,0,4"/>
+                <TextBox x:Name="CodeBox" MaxLength="12"/>
+                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                    <Button x:Name="VerifyButton" Content="Verify" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Verify_Click"/>
+                    <Button Content="Resend Code" Click="Resend_Click"/>
+                    <Button Content="Back" Click="Back_Click"/>
+                </StackPanel>
+            </StackPanel>
+
+            <TextBlock x:Name="StatusText" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+    </Border>
+</Window>

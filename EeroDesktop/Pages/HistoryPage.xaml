@@ -1,0 +1,137 @@
+<local:PageBase x:Class="EeroDesktop.Pages.HistoryPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:EeroDesktop.Pages"
+                xmlns:app="clr-namespace:EeroDesktop">
+    <local:PageBase.Resources>
+        <!-- Stat tile: a big number with a label (used where a chart would add nothing). -->
+        <Style x:Key="Tile" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Margin" Value="0,0,10,10"/>
+            <Setter Property="MinWidth" Value="150"/>
+        </Style>
+        <Style x:Key="TileValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+        </Style>
+        <Style x:Key="TileLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </Style>
+        <Style x:Key="Note" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </Style>
+    </local:PageBase.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" AutomationProperties.AutomationId="HistoryScroll">
+        <StackPanel MaxWidth="1000" HorizontalAlignment="Stretch" Margin="0,0,12,0">
+            <TextBlock Text="History" Style="{StaticResource PageTitle}"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Trends kept on this PC by eero Desktop: speed tests (eero itself keeps only about 30 days), outages it noticed, devices joining and leaving, and your DNS benchmark results. Nothing here is sent anywhere."/>
+
+            <StackPanel Style="{StaticResource Toolbar}">
+                <ComboBox x:Name="RangeCombo" Width="150" SelectedIndex="1" Margin="0,0,8,0" SelectionChanged="Range_Changed"
+                          AutomationProperties.AutomationId="HistoryRange" AutomationProperties.Name="Time range">
+                    <ComboBoxItem Content="Last 7 Days"/>
+                    <ComboBoxItem Content="Last 30 Days"/>
+                    <ComboBoxItem Content="Last 90 Days"/>
+                    <ComboBoxItem Content="Last Year"/>
+                    <ComboBoxItem Content="Everything"/>
+                </ComboBox>
+                <Button Content="Open History Folder" Click="OpenFolder_Click"/>
+                <Button Content="Clear History…" Style="{StaticResource DangerButton}" Click="Clear_Click"/>
+            </StackPanel>
+
+            <!-- Speed tests -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Speed Tests" Style="{StaticResource SectionTitle}"/>
+                    <WrapPanel x:Name="SpeedTiles"/>
+                    <app:LineChart x:Name="SpeedChart" AutomationProperties.AutomationId="SpeedChart" Margin="0,0,0,10"/>
+                    <DataGrid x:Name="SpeedHistoryGrid" MaxHeight="220" AutomationProperties.AutomationId="SpeedHistoryGrid" AutomationProperties.Name="Speed tests table">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="200"/>
+                            <DataGridTextColumn Header="Download (Mbps)" Binding="{Binding Down}" Width="Auto"/>
+                            <DataGridTextColumn Header="Upload (Mbps)" Binding="{Binding Up}" Width="Auto"/>
+                            <DataGridTextColumn Header="" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Outages -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Outages" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Style="{StaticResource Note}"
+                               Text="Seen by eero Desktop's background check (every 2 minutes, while it's running or in the tray). Outages while it was closed, or shorter than a couple of minutes, can be missed."/>
+                    <WrapPanel x:Name="OutageTiles"/>
+                    <DataGrid x:Name="OutageGrid" MaxHeight="260" AutomationProperties.AutomationId="OutageGrid" AutomationProperties.Name="Outages table">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Started" Binding="{Binding Started}" Width="Auto"/>
+                            <DataGridTextColumn Header="Ended" Binding="{Binding Ended}" Width="Auto"/>
+                            <DataGridTextColumn Header="Length" Binding="{Binding Length}" Width="Auto"/>
+                            <DataGridTextColumn Header="What" Binding="{Binding What}" Width="Auto"/>
+                            <DataGridTextColumn Header="Details" Binding="{Binding Detail}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Devices joining and leaving -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Devices" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Style="{StaticResource Note}"
+                               Text="When each device joined and left the network, as seen by the background check. A device counts as gone after missing two checks in a row (about 4 minutes), because sleeping phones drop off briefly. Kept for 90 days. Select a device to see its timeline."/>
+                    <WrapPanel x:Name="DeviceTiles"/>
+                    <DataGrid x:Name="DeviceHistoryGrid" MaxHeight="300" SelectionChanged="DeviceGrid_SelectionChanged"
+                              AutomationProperties.AutomationId="DeviceHistoryGrid" AutomationProperties.Name="Devices table">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Device" Binding="{Binding Name}" Width="*" MinWidth="160"/>
+                            <DataGridTemplateColumn Header="Now" CellTemplate="{StaticResource StatusCell}" SortMemberPath="Status" Width="Auto"/>
+                            <DataGridTextColumn Header="Last Joined" Binding="{Binding LastJoined}" Width="Auto"/>
+                            <DataGridTextColumn Header="Last Left" Binding="{Binding LastLeft}" Width="Auto"/>
+                            <DataGridTextColumn Header="Times Joined" Binding="{Binding Joins}" Width="Auto"/>
+                            <DataGridTextColumn Header="MAC Address" Binding="{Binding Mac}" Width="Auto"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock x:Name="DeviceTimelineTitle" FontWeight="SemiBold" Margin="0,12,0,6"/>
+                    <DataGrid x:Name="DeviceEventsGrid" MaxHeight="220" AutomationProperties.AutomationId="DeviceEventsGrid" AutomationProperties.Name="Device timeline">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="Auto"/>
+                            <DataGridTextColumn Header="Event" Binding="{Binding Event}" Width="Auto"/>
+                            <DataGridTextColumn Header="IP Address" Binding="{Binding Ip}" Width="Auto"/>
+                            <DataGridTextColumn Header="Details" Binding="{Binding Detail}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- DNS benchmarks -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="DNS Benchmarks" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Style="{StaticResource Note}"
+                               Text="Median lookup time per provider in each benchmark (Advanced › DNS › Benchmark DNS Servers). Measured from this PC; lower is faster."/>
+                    <app:LineChart x:Name="DnsChart" AutomationProperties.AutomationId="DnsHistoryChart" Margin="0,0,0,10"/>
+                    <DataGrid x:Name="DnsHistoryGrid" MaxHeight="220" AutomationProperties.AutomationId="DnsHistoryGrid" AutomationProperties.Name="DNS benchmarks table">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="Auto"/>
+                            <DataGridTextColumn Header="From" Binding="{Binding Connection}" Width="Auto"/>
+                            <DataGridTextColumn Header="Fastest" Binding="{Binding Fastest}" Width="Auto"/>
+                            <DataGridTextColumn Header="In Use" Binding="{Binding InUse}" Width="Auto"/>
+                            <DataGridTextColumn Header="All Results (Median)" Binding="{Binding All}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</local:PageBase>

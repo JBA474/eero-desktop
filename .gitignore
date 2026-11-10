@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+dist/
+*.user
+
+# Test results (screenshots, logs)
+tests/results/
+
+# Large or third-party material that can be regenerated or re-downloaded
+*.apk
+*.apkm
+*.xapk
+decompiled/
+decompiled-*/
+tools/jadx/
+tools/*.zip
+research/all_strings.txt
+research/endpoints-*.txt
