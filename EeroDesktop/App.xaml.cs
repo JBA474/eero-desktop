@@ -56,6 +56,7 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        AppUpdate.FinishPendingUpdate(e.Args); // after a self-update: let the old copy exit first, then remove it
         var exitRequest = e.Args.Any(a => a.Equals("--exit", StringComparison.OrdinalIgnoreCase));
 
         var showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ShowEventName);

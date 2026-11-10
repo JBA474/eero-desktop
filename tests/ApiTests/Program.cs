@@ -453,6 +453,32 @@ await Test("Security check flags risky settings and explains every open port", (
     return Task.FromResult($"{f.Count(x => x.Status == "Problem")} problems, {f.Count(x => x.Status == "Warning")} warnings, {f.Count(x => x.Status == "OK")} OK");
 });
 
+await Test("App update: GitHub's latest release is parsed, compared and verified by SHA-256", () =>
+{
+    var json = JsonNode.Parse("""
+        {"tag_name":"v9.2.0","html_url":"https://github.com/JBA474/eero-desktop/releases/tag/v9.2.0","draft":false,"prerelease":false,
+         "published_at":"2027-01-05T10:00:00Z","body":"notes",
+         "assets":[{"name":"EeroDesktop.exe","size":12,"browser_download_url":"https://github.com/JBA474/eero-desktop/releases/download/v9.2.0/EeroDesktop.exe",
+                    "digest":"sha256:ABCDEF0123"}]}
+        """);
+    var r = EeroDesktop.Api.AppUpdate.Parse(json)!;
+    Assert(r.Version == new Version(9, 2, 0) && r.Sha256 == "abcdef0123" && r.AssetUrl!.EndsWith("/EeroDesktop.exe"), $"parsed {r}");
+    Assert(EeroDesktop.Api.AppUpdate.IsNewer(r), "9.2.0 should be newer than the running version");
+    json!["prerelease"] = true;
+    Assert(EeroDesktop.Api.AppUpdate.Parse(json) is null, "prereleases must be ignored");
+    var same = JsonNode.Parse($$"""{"tag_name":"v{{EeroDesktop.Api.AppUpdate.Current}}","assets":[]}""");
+    Assert(!EeroDesktop.Api.AppUpdate.IsNewer(EeroDesktop.Api.AppUpdate.Parse(same)), "same version is not an update");
+
+    var file = Path.Combine(Path.GetTempPath(), $"eero-update-{Environment.ProcessId}.bin");
+    File.WriteAllText(file, "hello");
+    var ok = EeroDesktop.Api.AppUpdate.VerifySha256(file, "2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824");
+    var bad = EeroDesktop.Api.AppUpdate.VerifySha256(file, "00" + new string('0', 62));
+    File.Delete(file);
+    Assert(ok && !bad, $"sha256 ok={ok} bad={bad}");
+    Assert(!EeroDesktop.Api.AppUpdate.CanSelfUpdate(out var why) && why.Length > 0, "the test host must not count as a self-updatable EeroDesktop.exe");
+    return Task.FromResult($"v9.2.0 > {EeroDesktop.Api.AppUpdate.Current}; prerelease ignored; checksum checked; self-update refused here ({why})");
+});
+
 fake.Stop();
 foreach (var r in results) Console.WriteLine($"{(r.Pass ? "PASS" : "FAIL")}  {r.Name}  —  {r.Detail}");
 var failed = results.Count(r => !r.Pass);

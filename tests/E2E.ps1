@@ -677,6 +677,13 @@ Test 'Undo: the button appears for a saved change and asking No sends nothing' {
     Remove-Item $undoFile
     'button shown; confirmation explained the undo; No sent nothing'
 }
+Test 'Settings › About: Check for Updates reads the latest GitHub release (nothing is downloaded)' {
+    Select-Page 'Settings'
+    Invoke-El (Find $main 'AppUpdateCheckButton')
+    $text = Wait-Until { $t = (Find $main 'AppUpdateStatus').Current.Name; if ($t -match '^(Up to date|eero Desktop [\d.]+ is available|Couldn)') { $t } } 30 'update status'
+    Assert ($text -notmatch '^Couldn') $text
+    $text
+}
 Test 'Settings › About: eero app compatibility check reads Google Play' {
     Select-Page 'Settings'
     Invoke-El (Find $main 'EeroAppCheckButton')

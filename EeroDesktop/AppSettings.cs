@@ -40,6 +40,12 @@ public sealed class AppSettings
     public string? EeroAppLatestVersion { get; set; }
     public string? EeroAppLatestUpdated { get; set; }
 
+    /// <summary>Tell me when a new version of eero Desktop is released on GitHub (checked daily).</summary>
+    public bool AppUpdateAlerts { get; set; } = true;
+    public DateTime AppUpdateCheckedUtc { get; set; }
+    public string? AppUpdateLatestVersion { get; set; }
+    public string? AppUpdateNotifiedVersion { get; set; }
+
     /// <summary>Send a month-in-review notification at the start of each month.</summary>
     public bool MonthlySummary { get; set; } = true;
 

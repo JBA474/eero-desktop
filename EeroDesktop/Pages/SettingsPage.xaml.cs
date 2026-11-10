@@ -47,6 +47,8 @@ public partial class SettingsPage : PageBase
             NewDeviceAlerts.IsChecked = s.NewDeviceAlerts;
             EeroAppReleaseAlerts.IsChecked = s.EeroAppReleaseAlerts;
             MonthlySummaryOption.IsChecked = s.MonthlySummary;
+            AppUpdateAlerts.IsChecked = s.AppUpdateAlerts;
+            if (_latest is null) AppUpdateStatus.Text = AppUpdateStatusText(s, null);
             EeroAppStatus.Text = EeroAppStatusText(s);
             NotificationNote.Text = "Alerts appear as Windows notifications from the tray icon whenever eero Desktop is running — with the window open or in the tray. "
                                     + "The network is checked every 2 minutes.";
@@ -74,6 +76,74 @@ public partial class SettingsPage : PageBase
             return info?.Split('+')[0] ?? asm.GetName().Version?.ToString() ?? "unknown";
         }
     }
+
+    // ---------- eero Desktop updates ----------
+
+    private AppUpdate.Release? _latest;
+
+    public static string AppUpdateStatusText(AppSettings s, AppUpdate.Release? latest)
+    {
+        var current = AppUpdate.Current;
+        if (latest is not null)
+            return AppUpdate.IsNewer(latest)
+                ? $"eero Desktop {latest.Version} is available{(latest.Published is { } p ? $" (released {p:MMM d, yyyy})" : "")} — you have {current}."
+                : $"Up to date: {current} is the latest release.";
+        if (s.AppUpdateCheckedUtc == default) return $"You have {current}. Not checked for updates yet.";
+        var when = $"Last checked {s.AppUpdateCheckedUtc.ToLocalTime():MMM d, h:mm tt}.";
+        return Version.TryParse(s.AppUpdateLatestVersion, out var v) && v > current
+            ? $"eero Desktop {v} is available — you have {current}. {when}"
+            : $"Up to date: {current}. {when}";
+    }
+
+    private async void AppUpdateCheck_Click(object sender, RoutedEventArgs e)
+    {
+        AppUpdateCheckButton.IsEnabled = false;
+        S.Report("Checking GitHub for a newer eero Desktop…");
+        try
+        {
+            _latest = await AppUpdate.CheckNowAsync();
+            AppUpdateStatus.Text = _latest is null ? "Couldn't reach GitHub, or there are no releases yet. Try again later." : AppUpdateStatusText(AppSettings.Load(), _latest);
+            AppUpdateInstallButton.Visibility = AppUpdate.IsNewer(_latest) ? Visibility.Visible : Visibility.Collapsed;
+            if (_latest is not null) AppUpdateInstallButton.Content = $"Download and Install {_latest.Version}";
+            S.Report(AppUpdateStatus.Text);
+        }
+        finally { AppUpdateCheckButton.IsEnabled = true; }
+    }
+
+    private async void AppUpdateInstall_Click(object sender, RoutedEventArgs e)
+    {
+        if (!AppUpdate.IsNewer(_latest)) return;
+        var r = _latest!;
+        if (!AppUpdate.CanSelfUpdate(out var reason))
+        {
+            if (MessageBox.Show(Owner!, $"eero Desktop can't update this copy automatically: {reason}\n\nOpen the {r.Tag} release page to download it yourself?",
+                    "Update eero Desktop", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                Process.Start(new ProcessStartInfo(r.PageUrl) { UseShellExecute = true });
+            return;
+        }
+        var size = r.AssetSize > 0 ? $" ({r.AssetSize / (1024 * 1024)} MB)" : "";
+        if (!Confirm($"Download eero Desktop {r.Version}{size} from GitHub and install it?\n\nThe download is checked against GitHub's SHA-256 checksum before anything is replaced. eero Desktop then restarts; your sign-in, settings and history are kept.",
+                "Update eero Desktop")) return;
+
+        AppUpdateInstallButton.IsEnabled = AppUpdateCheckButton.IsEnabled = false;
+        try
+        {
+            var file = await AppUpdate.DownloadAsync(r, new Progress<string>(m => { AppUpdateStatus.Text = m; S.Report(m); }));
+            AppUpdateStatus.Text = $"Installing eero Desktop {r.Version} and restarting…";
+            AppUpdate.InstallAndRestart(file);
+            if (Application.Current is App app) app.ExitApp();
+        }
+        catch (Exception ex)
+        {
+            AppUpdateStatus.Text = "Update failed: " + ex.Message;
+            S.Report(AppUpdateStatus.Text);
+            MessageBox.Show(Owner!, ex.Message, "Update eero Desktop", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        finally { AppUpdateInstallButton.IsEnabled = AppUpdateCheckButton.IsEnabled = true; }
+    }
+
+    private void AppReleases_Click(object sender, RoutedEventArgs e)
+        => Process.Start(new ProcessStartInfo(_latest?.PageUrl ?? AppUpdate.ReleasesUrl) { UseShellExecute = true });
 
     /// <summary>Whether eero has shipped a newer Android app than the one eero Desktop's API calls were copied from.</summary>
     public static string EeroAppStatusText(AppSettings s)
@@ -130,6 +200,7 @@ public partial class SettingsPage : PageBase
         s.NewDeviceAlerts = NewDeviceAlerts.IsChecked == true;
         s.EeroAppReleaseAlerts = EeroAppReleaseAlerts.IsChecked == true;
         s.MonthlySummary = MonthlySummaryOption.IsChecked == true;
+        s.AppUpdateAlerts = AppUpdateAlerts.IsChecked == true;
         s.Save(); // also updates the tray menu checkmarks
         S.Report("Settings saved.");
     }

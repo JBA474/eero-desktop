@@ -36,6 +36,7 @@
                     <CheckBox x:Name="OutageAlerts" Content="Alert me when the internet or an eero goes down, and when it comes back" Checked="Option_Click" Unchecked="Option_Click"/>
                     <CheckBox x:Name="NewDeviceAlerts" Content="Alert me when a device joins the network for the first time" Checked="Option_Click" Unchecked="Option_Click" Margin="0,8,0,0"/>
                     <CheckBox x:Name="MonthlySummaryOption" Content="Send me a monthly summary: average speed, outages and DNS benchmarks" Checked="Option_Click" Unchecked="Option_Click" Margin="0,8,0,0"/>
+                    <CheckBox x:Name="AppUpdateAlerts" Content="Tell me when a new version of eero Desktop is available (checked daily on GitHub)" Checked="Option_Click" Unchecked="Option_Click" Margin="0,8,0,0"/>
                     <CheckBox x:Name="EeroAppReleaseAlerts" Content="Tell me when eero releases a new version of its app (checked weekly on Google Play)" Checked="Option_Click" Unchecked="Option_Click" Margin="0,8,0,0"/>
                     <TextBlock x:Name="NotificationNote" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
@@ -102,6 +103,16 @@
                         • Get alerts from the system tray when the internet or an eero goes down or a new device joins<LineBreak/>
                         • Keep a history of speed tests, outages and DNS benchmarks on this PC, with trend charts
                     </TextBlock>
+                    <TextBlock Text="eero Desktop Updates" FontWeight="SemiBold" Margin="0,4,0,4"/>
+                    <TextBlock x:Name="AppUpdateStatus" TextWrapping="Wrap" Margin="0,0,0,6" AutomationProperties.AutomationId="AppUpdateStatus"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <Button x:Name="AppUpdateCheckButton" Content="Check for Updates" Click="AppUpdateCheck_Click"/>
+                        <Button x:Name="AppUpdateInstallButton" Content="Download and Install" Style="{StaticResource PrimaryButton}"
+                                Click="AppUpdateInstall_Click" Visibility="Collapsed"/>
+                        <Button Content="View Releases on GitHub" Click="AppReleases_Click"/>
+                    </StackPanel>
+                    <TextBlock Margin="0,0,0,10" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               Text="Updates come from the GitHub releases of github.com/JBA474/eero-desktop. Each download is checked against the SHA-256 checksum GitHub publishes for it and is only installed if it matches; eero Desktop then restarts."/>
                     <TextBlock Text="eero App Compatibility" FontWeight="SemiBold" Margin="0,4,0,4"/>
                     <TextBlock x:Name="EeroAppStatus" TextWrapping="Wrap" Margin="0,0,0,6" AutomationProperties.AutomationId="EeroAppStatus"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">

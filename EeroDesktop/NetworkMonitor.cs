@@ -59,6 +59,7 @@ public sealed class NetworkMonitor : IDisposable
             if (parts.Count > 0) Summary?.Invoke(string.Join("; ", parts));
             if (parts.Count > 0) SendMonthlySummaryIfDue();
             await CheckEeroAppAsync();
+            await CheckAppUpdateAsync();
         }
         finally { _busy = false; }
     }
@@ -84,6 +85,20 @@ public sealed class NetworkMonitor : IDisposable
             s.Save();
         }
         catch (Exception ex) { AppSettings.Log("ERROR", "Monthly summary failed: " + ex.Message); }
+    }
+
+    /// <summary>Daily: tell the user when a newer eero Desktop is on GitHub (installed from Settings › About).</summary>
+    private async Task CheckAppUpdateAsync()
+    {
+        try
+        {
+            if (await AppUpdate.CheckIfDueAsync() is { } r)
+            {
+                AppSettings.Log("UPDATE", $"eero Desktop {r.Version} is available");
+                _notify(new($"eero Desktop {r.Version} is available", "Open Settings › About and choose Download and Install to update (you're on " + AppUpdate.Current + ").", false));
+            }
+        }
+        catch (Exception ex) { AppSettings.Log("ERROR", "Update check failed: " + ex.Message); }
     }
 
     /// <summary>Weekly: tell the user when eero ships a new Android app (the most likely moment the API changes).</summary>

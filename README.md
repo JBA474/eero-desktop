@@ -54,6 +54,18 @@ dotnet run --project EeroDesktop
 Sign in with the email or phone number on your eero account; eero sends a one-time code. The session is saved
 encrypted for your Windows account (DPAPI) at `%APPDATA%\EeroDesktop\session.bin`; **Sign Out** deletes it.
 
+### Updates
+
+Settings › About › **Check for Updates** looks at this repository's latest
+[GitHub release](https://github.com/JBA474/eero-desktop/releases). **Download and Install** fetches its
+`EeroDesktop.exe`, checks it against the SHA-256 checksum GitHub publishes for the file (it refuses anything that
+doesn't match or has no checksum), swaps it in place of the running exe and restarts; sign-in, settings and history are
+kept. The app also checks once a day and sends one notification per new version (Settings › Notifications to turn
+off). Development builds (run from `bin\`) open the release page instead of replacing themselves.
+
+To publish an update: raise `<Version>` in `EeroDesktop/EeroDesktop.csproj`, commit, run `tools\Publish.ps1`, and
+create a release tagged `v<version>` with `dist\EeroDesktop.exe` attached (named `EeroDesktop.exe`).
+
 ### Package a single EXE
 
 ```powershell
