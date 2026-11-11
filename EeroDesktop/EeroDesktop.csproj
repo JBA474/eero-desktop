@@ -13,7 +13,7 @@
     <Product>eero Desktop</Product>
     <!-- FileDescription: the name Windows shows on notifications and in Task Manager. -->
     <AssemblyTitle>eero Desktop</AssemblyTitle>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <!-- WPF0001: Application.ThemeMode (Fluent theme) is marked experimental. -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
