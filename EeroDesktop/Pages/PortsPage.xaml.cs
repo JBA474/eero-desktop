@@ -8,7 +8,7 @@ public partial class PortsPage : PageBase
 {
     public sealed record ReservationRow(JsonObject Json, string Description, string Ip, string Mac);
     public sealed record ForwardRow(JsonObject Json, string Description, string Ip, string GatewayPort, string ClientPort, string Protocol, string Enabled);
-    public sealed record PinholeRow(JsonObject Json, string Device, string Port, string Protocol, string Service);
+    public sealed record PinholeRow(JsonObject Json, string Device, string Port, string Protocol, string Service, string Address = "");
 
     /// <summary>Every device on the network keyed by its API URL and by its id (the MAC without colons).</summary>
     private static async Task<Dictionary<string, JsonObject>> DevicesByUrlAsync()
@@ -35,6 +35,27 @@ public partial class PortsPage : PageBase
         var mac = id.Length == 12 && id.All(Uri.IsHexDigit) ? string.Join(":", Enumerable.Range(0, 6).Select(i => id.Substring(i * 2, 2))).ToLowerInvariant() : id;
         var d = devices.GetValueOrDefault(deviceUrl.TrimStart('/')) ?? devices.GetValueOrDefault(id);
         return d is null ? $"Unknown device ({mac})" : $"{DevicesPage.DeviceName(d)} ({mac})";
+    }
+
+    /// <summary>
+    /// The device's public (global) IPv6 address — the one a pinhole opens — from its ipv6_addresses
+    /// ([{address, interface, scope: global|ula|site|link|host}]), else the first IPv6 in its "ips".
+    /// </summary>
+    public static string GlobalIpv6(JsonObject? device)
+    {
+        if (device is null) return "";
+        var global = device.Arr("ipv6_addresses").FirstOrDefault(a => string.Equals(a.S("scope"), "global", StringComparison.OrdinalIgnoreCase))?.S("address");
+        if (!string.IsNullOrEmpty(global)) return global;
+        return device["ips"] is System.Text.Json.Nodes.JsonArray ips
+            ? ips.Select(x => x?.ToString() ?? "").FirstOrDefault(x => x.Contains(':') && !x.StartsWith("fe80", StringComparison.OrdinalIgnoreCase)) ?? ""
+            : "";
+    }
+
+    private static JsonObject? PinholeDeviceJson(string? deviceUrl, IReadOnlyDictionary<string, JsonObject> devices)
+    {
+        if (string.IsNullOrEmpty(deviceUrl)) return null;
+        var id = deviceUrl.TrimEnd('/').Split('/')[^1];
+        return devices.GetValueOrDefault(deviceUrl.TrimStart('/')) ?? devices.GetValueOrDefault(id);
     }
 
     /// <summary>Well-known services by port, so a pinhole or forward says what it's for.</summary>
@@ -66,6 +87,12 @@ public partial class PortsPage : PageBase
             ? new HostTarget(f.Description.Length > 0 ? f.Description : f.Ip, f.Ip,
                 !f.Protocol.Equals("udp", StringComparison.OrdinalIgnoreCase) && int.TryParse(f.ClientPort, out var p) ? p : null)
             : null);
+        // A pinhole acts on the device's public IPv6 address, and its browser links go to the pinhole's port.
+        HostActions.Attach(PinholeGrid, o => o is PinholeRow h
+            ? new HostTarget(h.Device, h.Address,
+                !h.Protocol.Equals("udp", StringComparison.OrdinalIgnoreCase) && int.TryParse(h.Port, out var p) ? p : null,
+                $"{h.Device} has no public IPv6 address, so this pinhole can't be reached")
+            : null);
     }
 
     public override string Title => "Reservations & Ports";
@@ -90,13 +117,14 @@ public partial class PortsPage : PageBase
                 // eero names the device only by its API URL (…/devices/9009d0581ebb); look up its name.
                 var devices = pinholes.Count == 0 ? [] : await DevicesByUrlAsync();
                 pin = pinholes.Select(p => new PinholeRow(p, PinholeDevice(p.S("device"), devices), p.S("port") ?? "",
-                        (p.S("protocol") ?? "").ToUpperInvariant(), PortService(p.S("port")))).ToList();
+                        (p.S("protocol") ?? "").ToUpperInvariant(), PortService(p.S("port")), GlobalIpv6(PinholeDeviceJson(p.S("device"), devices)))).ToList();
             }
             catch (EeroApiException) { /* IPv6 pinholes not available */ }
         });
         ReservationGrid.ItemsSource = res;
         ForwardGrid.ItemsSource = fwd;
         PinholeGrid.ItemsSource = pin;
+        ShowNatNote();
     }
 
     // ----- reservations -----
@@ -204,6 +232,58 @@ public partial class PortsPage : PageBase
         if (!Confirm($"Delete the port forward \"{f.Description}\" ({f.GatewayPort} → {f.Ip}:{f.ClientPort})?", "Delete Port Forward")) return;
         await Run("Deleting port forward…", () => Api.DeleteAsync(f.Json.S("url")!), "Port forward deleted.");
         await LoadAsync();
+    }
+
+    /// <summary>Warns on the page when eero sits behind carrier-grade NAT or another router, where forwards can't work.</summary>
+    private void ShowNatNote()
+    {
+        var problem = PortCheck.NatProblem(S.Network.S("wan_ip"), S.Network.S("ip_settings.public_ip"));
+        NatNoteText.Text = problem ?? "";
+        NatNote.Visibility = problem is null ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    /// <summary>Asks portchecker.io to connect to each enabled TCP forward on the network's public IP.</summary>
+    private async void CheckForwards_Click(object sender, RoutedEventArgs e)
+    {
+        var forwards = ((IEnumerable<ForwardRow>?)ForwardGrid.ItemsSource ?? []).ToList();
+        var publicIp = S.Network.S("ip_settings.public_ip");
+        if (forwards.Count == 0) { S.Report("There are no port forwards to check."); return; }
+        if (string.IsNullOrEmpty(publicIp)) { S.Report("eero hasn't reported the network's public IP address."); return; }
+
+        var tcp = forwards.Where(f => f.Enabled == "Yes" && !f.Protocol.Equals("UDP", StringComparison.OrdinalIgnoreCase)
+                                      && int.TryParse(f.GatewayPort, out _)).ToList();
+        var ports = tcp.Select(f => int.Parse(f.GatewayPort)).Distinct().ToList();
+        if (ports.Count > 0 && !Confirm(
+                $"This sends your public IP address ({publicIp}) and the port numbers {string.Join(", ", ports)} to {PortCheck.Service}, " +
+                "which tries to connect to them from the internet. Nothing is changed on your network.\n\nCheck now?", "Check From Internet"))
+            return;
+
+        Dictionary<int, bool> open = [];
+        if (ports.Count > 0 && !await Run($"Checking {ports.Count} port(s) from the internet…",
+                async () => open = await PortCheck.CheckAsync(publicIp, ports), "Port check finished."))
+            return;
+
+        var lines = new List<string>();
+        foreach (var f in forwards)
+        {
+            var what = $"{(f.Description.Length > 0 ? f.Description : f.Ip)} — port {f.GatewayPort} {f.Protocol}";
+            string verdict;
+            if (f.Enabled != "Yes") verdict = "turned off";
+            else if (!int.TryParse(f.GatewayPort, out var port)) verdict = "not checked (port range)";
+            else if (f.Protocol.Equals("UDP", StringComparison.OrdinalIgnoreCase)) verdict = "not checked (UDP can't be tested from outside)";
+            else verdict = open.TryGetValue(port, out var ok) ? (ok ? "OPEN from the internet" : "closed / not reachable")
+                                                              : "no answer from the checker";
+            if (f.Protocol.Equals("BOTH", StringComparison.OrdinalIgnoreCase) && f.Enabled == "Yes") verdict += " (TCP checked; UDP can't be)";
+            lines.Add($"• {what}: {verdict}");
+        }
+
+        var text = $"Checked from the internet by {PortCheck.Service} at {publicIp}:\n\n" + string.Join("\n", lines);
+        var nat = PortCheck.NatProblem(S.Network.S("wan_ip"), publicIp);
+        if (nat is not null) text += "\n\nWhy: " + nat;
+        else if (open.Count > 0 && open.Values.Any(v => !v))
+            text += "\n\nA closed forward usually means nothing is listening on that port, or a firewall on the device (e.g. the NAS) blocks it.";
+        AppSettings.Log("PORTS", $"checked {string.Join(", ", open.Select(kv => $"{kv.Key}={(kv.Value ? "open" : "closed")}"))}");
+        MessageBox.Show(Owner!, text, "Check From Internet", MessageBoxButton.OK, nat is null ? MessageBoxImage.Information : MessageBoxImage.Warning);
     }
 
     // ----- IPv6 pinholes -----

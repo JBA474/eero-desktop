@@ -24,9 +24,12 @@ eero account and talks to the same cloud API as the eero Android app (v26.13.0).
 - **DNS Benchmark:** compares your ISP's DNS with public resolvers using
   [dnspyre](https://github.com/Tantalor93/dnspyre) and can switch eero to the fastest.
 - **Security Check:** reviews risky settings and every port open to the internet.
-- **Reservations, port forwarding and IPv6 pinholes.**
-- **Host tools:** right-click a device, eero, reservation or port forward to ping it, connect with SSH (Windows
-  OpenSSH in Windows Terminal), or open it over HTTP, HTTPS or FTP (a port forward opens at its internal port).
+- **Reservations, port forwarding and IPv6 pinholes.** **Check From Internet** asks portchecker.io whether each TCP
+  forward answers from outside (after asking you, since it sends your public IP), and the page warns when your
+  provider uses carrier-grade NAT or another router sits in front of eero, which makes forwards unreachable.
+- **Host tools:** right-click a device, eero, reservation, port forward, IPv6 pinhole or History device to ping it,
+  connect with SSH (Windows OpenSSH in Windows Terminal), or open it over HTTP, HTTPS or FTP (forwards and pinholes
+  open at their port).
 - **History:** speed tests, outages, devices joining and leaving, and DNS benchmarks kept on your PC, with charts.
 - **Tray and alerts:** keeps watching from the notification area; alerts when the internet or an eero goes down or a
   new device joins; monthly summary.

@@ -497,6 +497,46 @@ await Test("Host menu: links are built right and nothing unsafe reaches a comman
     return Task.FromResult("Android_7I5KBBQS shows as 'Android 7I5KBBQS'; http/https/ftp URLs incl. ports and IPv6; option-like and shell-special hosts refused; WinSCP command parsed");
 });
 
+await Test("Port check: carrier-grade NAT is spotted, portchecker.io replies are read, pinholes find the public IPv6", async () =>
+{
+    Assert(EeroDesktop.Api.PortCheck.WanKind("100.80.61.119") == EeroDesktop.Api.PortCheck.NatKind.CarrierGrade, "100.64/10 is CGNAT");
+    Assert(EeroDesktop.Api.PortCheck.WanKind("100.128.0.1") == EeroDesktop.Api.PortCheck.NatKind.Public, "100.128 is not CGNAT");
+    Assert(EeroDesktop.Api.PortCheck.WanKind("192.168.0.20") == EeroDesktop.Api.PortCheck.NatKind.Private, "behind another router");
+    Assert(EeroDesktop.Api.PortCheck.NatProblem("69.174.144.90", "69.174.144.90") is null, "public WAN has no problem");
+    Assert(EeroDesktop.Api.PortCheck.NatProblem("100.80.61.119", "69.174.144.90")!.Contains("carrier-grade NAT"), "CGNAT explained");
+
+    // Fake portchecker.io on a free local port.
+    var l = new TcpListener(IPAddress.Loopback, 0); l.Start(); var port = ((IPEndPoint)l.LocalEndpoint).Port; l.Stop();
+    using var http = new HttpListener(); http.Prefixes.Add($"http://127.0.0.1:{port}/"); http.Start();
+    string? sent = null;
+    var serve = Task.Run(async () =>
+    {
+        var ctx = await http.GetContextAsync();
+        sent = await new StreamReader(ctx.Request.InputStream).ReadToEndAsync();
+        var bytes = Encoding.UTF8.GetBytes("{\"error\":false,\"msg\":null,\"check\":[{\"port\":32400,\"status\":true},{\"port\":5001,\"status\":false}],\"host\":\"203.0.113.9\"}");
+        ctx.Response.ContentType = "application/json"; await ctx.Response.OutputStream.WriteAsync(bytes); ctx.Response.Close();
+    });
+    Environment.SetEnvironmentVariable("EERO_DESKTOP_PORTCHECK_API", $"http://127.0.0.1:{port}/");
+    try
+    {
+        var open = await EeroDesktop.Api.PortCheck.CheckAsync("203.0.113.9", [32400, 5001, 32400]);
+        await serve;
+        Assert(open[32400] && !open[5001], "parsed: " + string.Join(",", open));
+        var body = JsonNode.Parse(sent!)!;
+        Assert(body["host"]!.ToString() == "203.0.113.9" && body["ports"]!.AsArray().Count == 2, "request body: " + sent);
+    }
+    finally { Environment.SetEnvironmentVariable("EERO_DESKTOP_PORTCHECK_API", null); }
+    var failed = false;
+    try { EeroDesktop.Api.PortCheck.Parse(JsonNode.Parse("{\"error\":true,\"msg\":\"bad host\"}")); } catch (InvalidOperationException) { failed = true; }
+    Assert(failed, "an error reply must throw");
+
+    var nas = JsonNode.Parse("{\"ipv6_addresses\":[{\"address\":\"fd2d::1\",\"scope\":\"ula\"},{\"address\":\"fe80::1\",\"scope\":\"link\"}],\"ips\":[\"192.168.1.69\"]}")!.AsObject();
+    Assert(EeroDesktop.Pages.PortsPage.GlobalIpv6(nas) == "", "ULA/link-local are not public");
+    nas["ipv6_addresses"]!.AsArray().Add(JsonNode.Parse("{\"address\":\"2601:240::69\",\"scope\":\"global\"}"));
+    Assert(EeroDesktop.Pages.PortsPage.GlobalIpv6(nas) == "2601:240::69", "global address picked");
+    return "100.80.x = CGNAT (explained); 32400 open / 5001 closed parsed; duplicate ports sent once; pinhole uses the global IPv6 only";
+});
+
 fake.Stop();
 foreach (var r in results) Console.WriteLine($"{(r.Pass ? "PASS" : "FAIL")}  {r.Name}  —  {r.Detail}");
 var failed = results.Count(r => !r.Pass);

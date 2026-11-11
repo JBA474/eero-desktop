@@ -67,6 +67,9 @@ public static class SecurityCheck
             else
                 f.Add(new(Ok, "Port forward", $"{what}. Open to the internet; make sure you still use it.", "Reservations & Ports"));
         }
+        // Behind carrier-grade NAT (or another router) forwards can't be reached from the internet at all: safer, but useless.
+        if (enabled.Count > 0 && EeroDesktop.Api.PortCheck.NatProblem(i.Network.S("wan_ip"), i.Network.S("ip_settings.public_ip")) is { } nat)
+            f.Add(new(Warn, "Port forwards unreachable", nat + " Until then these forwards expose nothing, but they also don't work — check with Reservations & Ports › Check From Internet.", "Reservations & Ports"));
         if (i.Forwards.Count > enabled.Count)
             f.Add(new(Ok, "Disabled port forwards", $"{i.Forwards.Count - enabled.Count} saved but turned off.", "Reservations & Ports"));
 

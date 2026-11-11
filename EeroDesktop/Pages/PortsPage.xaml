@@ -16,6 +16,10 @@
             <TextBlock Text="Reservations &amp; Port Forwarding" Style="{StaticResource PageTitle}"/>
             <TextBlock Text="Give devices fixed IP addresses and open ports to them from the internet."
                        Style="{StaticResource PageSubtitle}"/>
+            <Border x:Name="NatNote" Visibility="Collapsed" Margin="0,0,0,12" Padding="12,8" CornerRadius="6" BorderThickness="1"
+                    BorderBrush="{DynamicResource SystemFillColorCautionBrush}" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+                <TextBlock x:Name="NatNoteText" TextWrapping="Wrap" AutomationProperties.AutomationId="NatNote"/>
+            </Border>
         </StackPanel>
 
         <DockPanel Grid.Row="1">
@@ -41,6 +45,9 @@
                 <Button Content="Edit" Click="EditForward_Click"/>
                 <Button Content="Enable / Disable" Click="ToggleForward_Click"/>
                 <Button Content="Delete" Style="{StaticResource DangerButton}" Click="DeleteForward_Click"/>
+                <Button x:Name="CheckForwardsButton" Content="Check From Internet" Click="CheckForwards_Click"
+                        AutomationProperties.AutomationId="CheckForwardsButton"
+                        ToolTip="Asks portchecker.io to connect to each TCP forward from the internet (eero can't loop back to its own public address, so a test from home proves nothing)."/>
             </StackPanel>
         </DockPanel>
         <DataGrid x:Name="ForwardGrid" Grid.Row="4">
@@ -65,6 +72,7 @@
         <DataGrid x:Name="PinholeGrid" Grid.Row="6">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Device" Binding="{Binding Device}" Width="*"/>
+                <DataGridTextColumn Header="IPv6 Address" Binding="{Binding Address}" Width="Auto"/>
                 <DataGridTextColumn Header="Service" Binding="{Binding Service}" Width="Auto" MinWidth="120"/>
                 <DataGridTextColumn Header="Port" Binding="{Binding Port}" Width="110"/>
                 <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" Width="80"/>

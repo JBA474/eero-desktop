@@ -10,7 +10,7 @@ using Microsoft.Win32;
 namespace EeroDesktop;
 
 /// <summary>A host shown in a table row: its display name, its address (empty when it has none), and an optional web port.</summary>
-public sealed record HostTarget(string Name, string Host, int? WebPort = null);
+public sealed record HostTarget(string Name, string Host, int? WebPort = null, string? Missing = null);
 
 /// <summary>
 /// Right-click menu for tables that list hosts (Devices, eeros, reservations, port forwards): Ping (built-in window),
@@ -76,7 +76,7 @@ public static partial class HostActions
         menu.Items.Clear();
         if (!IsSafeHost(t.Host))
         {
-            menu.Items.Add(new MenuItem { Header = Plain($"{t.Name} has no IP address right now"), IsEnabled = false });
+            menu.Items.Add(new MenuItem { Header = Plain(t.Missing ?? $"{t.Name} has no IP address right now"), IsEnabled = false });
             return;
         }
 

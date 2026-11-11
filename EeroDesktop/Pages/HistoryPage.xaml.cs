@@ -21,6 +21,10 @@ public partial class HistoryPage : PageBase
     public HistoryPage()
     {
         InitializeComponent();
+        // The address a device last joined with (eero hands out the same one while its lease lasts).
+        HostActions.Attach(DeviceHistoryGrid, o => o is DeviceRow r
+            ? new HostTarget(r.Name, r.Events.LastOrDefault(e => !string.IsNullOrEmpty(e.Ip))?.Ip ?? "")
+            : null);
         SpeedChart.FormatY = v => $"{v:0} Mbps";
         DnsChart.FormatY = v => $"{v:0} ms";
     }
