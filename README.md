@@ -25,6 +25,8 @@ eero account and talks to the same cloud API as the eero Android app (v26.13.0).
   [dnspyre](https://github.com/Tantalor93/dnspyre) and can switch eero to the fastest.
 - **Security Check:** reviews risky settings and every port open to the internet.
 - **Reservations, port forwarding and IPv6 pinholes.**
+- **Host tools:** right-click a device, eero, reservation or port forward to ping it, connect with SSH (Windows
+  OpenSSH in Windows Terminal), or open it over HTTP, HTTPS or FTP (a port forward opens at its internal port).
 - **History:** speed tests, outages, devices joining and leaving, and DNS benchmarks kept on your PC, with charts.
 - **Tray and alerts:** keeps watching from the notification area; alerts when the internet or an eero goes down or a
   new device joins; monthly summary.

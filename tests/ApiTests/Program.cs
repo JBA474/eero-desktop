@@ -479,6 +479,24 @@ await Test("App update: GitHub's latest release is parsed, compared and verified
     return Task.FromResult($"v9.2.0 > {EeroDesktop.Api.AppUpdate.Current}; prerelease ignored; checksum checked; self-update refused here ({why})");
 });
 
+await Test("Host menu: links are built right and nothing unsafe reaches a command line", () =>
+{
+    Assert(EeroDesktop.HostActions.Url("http", "192.168.1.69") == "http://192.168.1.69/", "plain http");
+    Assert(EeroDesktop.HostActions.Url("http", "192.168.1.69", 32400) == "http://192.168.1.69:32400/", "http with port");
+    Assert(EeroDesktop.HostActions.Url("https", "192.168.1.69", 443) == "https://192.168.1.69/", "default https port dropped");
+    Assert(EeroDesktop.HostActions.Url("http", "fe80::1%12") == "http://[fe80::1%2512]/", "IPv6 bracketed, zone escaped: " + EeroDesktop.HostActions.Url("http", "fe80::1%12"));
+    foreach (var good in new[] { "192.168.1.1", "2601:240::5", "fe80::1%12", "nas.local" })
+        Assert(EeroDesktop.HostActions.IsSafeHost(good), "should allow " + good);
+    foreach (var bad in new[] { "", "-oProxyCommand=calc", "a b", "a;calc", "a&calc", "\"x\"", "a|b", "x@y" })
+        Assert(!EeroDesktop.HostActions.IsSafeHost(bad), "should refuse " + bad);
+    var cmd = EeroDesktop.HostActions.SplitCommand("\"C:\\Program Files (x86)\\WinSCP\\WinSCP.exe\" /Unsafe \"%1\"");
+    Assert(cmd is { Exe: @"C:\Program Files (x86)\WinSCP\WinSCP.exe" } c && c.Args.SequenceEqual(["/Unsafe", "%1"]), "registry command split");
+    Assert(EeroDesktop.Pages.DevicesPage.Readable("Android_7I5KBBQS") == "Android 7I5KBBQS", "underscore → space");
+    Assert(EeroDesktop.Pages.DevicesPage.Readable("my__nas_") == "my nas", "repeated/trailing underscores collapse");
+    Assert(EeroDesktop.Pages.DevicesPage.Readable("___") == "___", "a name of only underscores is left as is");
+    return Task.FromResult("Android_7I5KBBQS shows as 'Android 7I5KBBQS'; http/https/ftp URLs incl. ports and IPv6; option-like and shell-special hosts refused; WinSCP command parsed");
+});
+
 fake.Stop();
 foreach (var r in results) Console.WriteLine($"{(r.Pass ? "PASS" : "FAIL")}  {r.Name}  —  {r.Detail}");
 var failed = results.Count(r => !r.Pass);

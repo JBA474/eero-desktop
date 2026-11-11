@@ -58,6 +58,9 @@ public sealed class AppSettings
     /// <summary>The newer eero app version already announced (so it's announced once).</summary>
     public string? EeroAppNotifiedVersion { get; set; }
 
+    /// <summary>Last SSH user name used for each host (right-click › Connect with SSH).</summary>
+    public Dictionary<string, string> SshUsers { get; set; } = [];
+
     /// <summary>Raised after settings are saved, so the tray menu and Settings page stay in sync.</summary>
     public static event Action? Changed;
 

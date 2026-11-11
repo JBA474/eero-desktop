@@ -155,7 +155,7 @@ function Stop-App($proc) { if ($proc -and -not $proc.HasExited) { $proc.Kill(); 
 $DataDir = Join-Path $OutDir 'data'
 $FilesDir = Join-Path $OutDir 'files'   # Backup & Export write here instead of showing Windows file dialogs
 $alertsLog = Join-Path $DataDir 'alerts.log'
-$AppEnv = @{ EERO_DESKTOP_DATA_DIR = $DataDir; EERO_DESKTOP_MONITOR_SECONDS = '5'; EERO_DESKTOP_TEST_FILE_DIR = $FilesDir; EERO_DESKTOP_DNS_REPEATS = '1' }
+$AppEnv = @{ EERO_DESKTOP_DATA_DIR = $DataDir; EERO_DESKTOP_MONITOR_SECONDS = '5'; EERO_DESKTOP_TEST_FILE_DIR = $FilesDir; EERO_DESKTOP_DNS_REPEATS = '1'; EERO_DESKTOP_TEST_HOST_MENU = '1' }
 
 Log "eero Desktop E2E — results in $OutDir"
 Get-Process EeroDesktop -ErrorAction SilentlyContinue | ForEach-Object {
@@ -689,6 +689,52 @@ Test 'Settings › About: eero app compatibility check reads Google Play' {
     Invoke-El (Find $main 'EeroAppCheckButton')
     $text = Wait-Until { $t = (Find $main 'EeroAppStatus').Current.Name; if ($t -match '^(Up to date|eero has released)') { $t } } 30 'eero app status'
     $text
+}
+# Host right-click menu. UI Automation can't right-click without moving the real mouse, so EERO_DESKTOP_TEST_HOST_MENU=1
+# makes selecting a row open the same menu. Only Ping is used (read-only); SSH/HTTP/FTP would launch other programs.
+function Get-HostMenu {
+    Wait-Until {
+        @($AE::RootElement.FindAll($TS::Children, (New-Object System.Windows.Automation.PropertyCondition ($AE::ProcessIdProperty), $app.Id))) +
+        @($main.FindAll($TS::Descendants, (New-Object System.Windows.Automation.PropertyCondition ($AE::ControlTypeProperty), $CT::Menu))) |
+            Where-Object { $_.Current.ControlType -eq $CT::Menu } | Select-Object -First 1
+    } 5 'host menu'
+}
+function Get-MenuNames($menu) { @($menu.FindAll($TS::Descendants, (New-Object System.Windows.Automation.PropertyCondition ($AE::ControlTypeProperty), $CT::MenuItem)) | ForEach-Object { $_.Current.Name }) }
+function Ping-FromMenu($menu, [string]$ip) {
+    Invoke-El ($menu.FindFirst($TS::Descendants, (New-Object System.Windows.Automation.PropertyCondition ($AE::AutomationIdProperty), 'HostPing')))
+    $pw = Get-OwnedWindow "Ping $ip"
+    try { Wait-Until { $t = (Find $pw 'PingStats').Current.Name; if ($t -match 'Sent [2-9]') { $t } } 15 'two pings' }
+    finally { Invoke-El (Find-ByName $pw 'Close' $CT::Button) }
+}
+Test 'Right-click: a device offers Ping, SSH, HTTP/HTTPS and FTP, and Ping replies' {
+    Select-Page 'Devices'
+    $grid = Find $main 'Grid'
+    $first = $grid.FindFirst($TS::Children, (New-Object System.Windows.Automation.PropertyCondition ($AE::ControlTypeProperty), $CT::DataItem))
+    $first.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+    $menu = Get-HostMenu
+    $names = Get-MenuNames $menu
+    $ip = ([regex]::Match($names[0], '\(([^)]+)\)$')).Groups[1].Value
+    Assert ([bool]$ip) "menu title has no address: $($names[0])"
+    foreach ($want in 'Ping', 'Connect with SSH…', "Open http://$ip/", "Open https://$ip/", "Open ftp://$ip/ (FTP)", 'Copy Address') {
+        Assert ($names -contains $want) "missing '$want' in: $($names -join ' | ')"
+    }
+    $stats = Ping-FromMenu $menu $ip
+    "$($names[0]): $stats"
+}
+Test 'Right-click: a TCP port forward opens the browser at its internal port' {
+    Select-Page 'Reservations & Ports'
+    $grid = Find $main 'ForwardGrid'
+    $rows = @($grid.FindAll($TS::Children, (New-Object System.Windows.Automation.PropertyCondition ($AE::ControlTypeProperty), $CT::DataItem)))
+    $row = $rows | Where-Object { (@($_.FindAll($TS::Descendants, (New-Object System.Windows.Automation.PropertyCondition ($AE::ControlTypeProperty), $CT::Text)) | ForEach-Object { $_.Current.Name })) -notcontains 'udp' } | Select-Object -First 1
+    if (-not $row) { return 'no TCP forwards to check' }
+    $row.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+    $menu = Get-HostMenu
+    $names = Get-MenuNames $menu
+    $http = $names | Where-Object { $_ -match '^Open http://[\d.]+:\d+/$' } | Select-Object -First 1
+    $ip = ([regex]::Match($names[0], '\(([^)]+)\)$')).Groups[1].Value
+    Ping-FromMenu $menu $ip | Out-Null
+    Assert ([bool]$http) "no port link in: $($names -join ' | ')"
+    "$($names[0]): $http"
 }
 Close-StrayDialogs
 Test 'API Console: GET 2.2/account returns the account JSON' {

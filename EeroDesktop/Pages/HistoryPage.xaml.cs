@@ -90,7 +90,7 @@ public partial class HistoryPage : PageBase
                 var inRange = list.Where(e => e.Utc >= since).ToList();
                 var lastOn = list.LastOrDefault(e => e.State == "online");
                 var lastOff = list.LastOrDefault(e => e.State == "offline");
-                return (Row: new DeviceRow(list[^1].Name, list[^1].State == "online" ? "Online" : "Offline",
+                return (Row: new DeviceRow(DevicesPage.Readable(list[^1].Name), list[^1].State == "online" ? "Online" : "Offline",
                         lastOn is null ? "" : Local(lastOn.Utc), lastOff is null ? "" : Local(lastOff.Utc),
                         inRange.Count(e => e.State == "online"), g.Key, list),
                     Last: list[^1].Utc, Active: inRange.Count > 0);

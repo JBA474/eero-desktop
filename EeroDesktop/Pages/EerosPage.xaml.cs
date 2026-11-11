@@ -9,7 +9,11 @@ public partial class EerosPage : PageBase
     public sealed record Row(JsonObject Json, string Location, string Status, string Role, string Model, string Connection,
         string Ip, string Clients, string Firmware, string Light, string Serial, string LastReboot);
 
-    public EerosPage() => InitializeComponent();
+    public EerosPage()
+    {
+        InitializeComponent();
+        HostActions.Attach(Grid, o => o is Row r ? new HostTarget($"eero {r.Location}", r.Ip) : null);
+    }
 
     public override string Title => "eeros";
 

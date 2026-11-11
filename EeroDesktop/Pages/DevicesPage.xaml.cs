@@ -11,7 +11,11 @@ public partial class DevicesPage : PageBase
 
     private List<Row> _all = [];
 
-    public DevicesPage() => InitializeComponent();
+    public DevicesPage()
+    {
+        InitializeComponent();
+        HostActions.Attach(Grid, o => o is Row r ? new HostTarget(r.Name, r.Ip) : null);
+    }
 
     public override string Title => "Devices";
 
@@ -38,12 +42,16 @@ public partial class DevicesPage : PageBase
         ApplyFilter();
     }
 
-    public static string DeviceName(JsonNode d)
-        => d.S("nickname") is { Length: > 0 } n ? n
+    /// <summary>The name shown for a device. Underscores read as spaces ("Android_7I5KBBQS" → "Android 7I5KBBQS").</summary>
+    public static string DeviceName(JsonNode d) => Readable(
+           d.S("nickname") is { Length: > 0 } n ? n
          : d.S("display_name") is { Length: > 0 } dn ? dn
          : d.S("hostname") is { Length: > 0 } h ? h
          : d.S("model_name") is { Length: > 0 } m ? m
-         : d.S("mac") ?? "Unknown device";
+         : d.S("mac") ?? "Unknown device");
+
+    public static string Readable(string name) =>
+        string.Join(' ', name.Replace('_', ' ').Split(' ', StringSplitOptions.RemoveEmptyEntries)) is { Length: > 0 } s ? s : name;
 
     private static Row ToRow(JsonObject d)
     {
@@ -80,7 +88,7 @@ public partial class DevicesPage : PageBase
         var onlineOnly = OnlineOnly.IsChecked == true;
         var needsName = NeedsNameOnly.IsChecked == true;
         var rows = _all.Where(r => (!onlineOnly || r.Online || r.Blocked || r.Paused) && (!needsName || NeedsName(r.Json))
-            && (q.Length == 0 || r.Name.Contains(q, StringComparison.OrdinalIgnoreCase) || r.Ip.Contains(q) || r.Mac.Contains(q, StringComparison.OrdinalIgnoreCase)
+            && (q.Length == 0 || r.Name.Contains(q.Replace('_', ' '), StringComparison.OrdinalIgnoreCase) || r.Ip.Contains(q) || r.Mac.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || r.Manufacturer.Contains(q, StringComparison.OrdinalIgnoreCase) || r.Profile.Contains(q, StringComparison.OrdinalIgnoreCase))).ToList();
         Grid.ItemsSource = rows;
         var unnamed = _all.Count(r => NeedsName(r.Json));

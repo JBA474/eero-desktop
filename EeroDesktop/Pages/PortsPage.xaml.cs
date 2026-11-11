@@ -57,7 +57,16 @@ public partial class PortsPage : PageBase
 
     private static readonly string[] Protocols = ["tcp", "udp", "both"];
 
-    public PortsPage() => InitializeComponent();
+    public PortsPage()
+    {
+        InitializeComponent();
+        HostActions.Attach(ReservationGrid, o => o is ReservationRow r ? new HostTarget(r.Description.Length > 0 ? r.Description : r.Ip, r.Ip) : null);
+        // A forward's browser links go to its internal port (e.g. Plex at :32400) when it forwards TCP.
+        HostActions.Attach(ForwardGrid, o => o is ForwardRow f
+            ? new HostTarget(f.Description.Length > 0 ? f.Description : f.Ip, f.Ip,
+                !f.Protocol.Equals("udp", StringComparison.OrdinalIgnoreCase) && int.TryParse(f.ClientPort, out var p) ? p : null)
+            : null);
+    }
 
     public override string Title => "Reservations & Ports";
 
